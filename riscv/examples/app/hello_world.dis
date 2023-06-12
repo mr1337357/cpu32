@@ -103,10 +103,6 @@ Disassembly of section .text:
  666:	bf69                	j	600 <register_tm_clones>
 
 0000000000000668 <main>:
-#include <stdio.h>
-
-int main(int argc,char **argv)
-{
  668:	1101                	addi	sp,sp,-32
  66a:	ec06                	sd	ra,24(sp)
  66c:	e822                	sd	s0,16(sp)
@@ -114,15 +110,12 @@ int main(int argc,char **argv)
  670:	87aa                	mv	a5,a0
  672:	feb43023          	sd	a1,-32(s0)
  676:	fef42623          	sw	a5,-20(s0)
-  printf("Hello %s\n","World");
  67a:	00000597          	auipc	a1,0x0
  67e:	02e58593          	addi	a1,a1,46 # 6a8 <_IO_stdin_used+0x8>
  682:	00000517          	auipc	a0,0x0
  686:	02e50513          	addi	a0,a0,46 # 6b0 <_IO_stdin_used+0x10>
  68a:	f17ff0ef          	jal	ra,5a0 <printf@plt>
-  return 0;
  68e:	4781                	li	a5,0
-}
  690:	853e                	mv	a0,a5
  692:	60e2                	ld	ra,24(sp)
  694:	6442                	ld	s0,16(sp)

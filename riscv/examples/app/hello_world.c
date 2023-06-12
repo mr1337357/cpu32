@@ -2,6 +2,6 @@
 
 int main(int argc,char **argv)
 {
-  printf("Hello %s\n","World");
+  printf("Hello %s\n","world");
   return 0;
 }
