@@ -5,79 +5,45 @@ import mem
 
 import sys
 
-
-
 opcodes = {
-    0x17: (0,'auipc','u'),
-    0x37: (0,'lui','i'),
-    0x6f: (0,'jal','j'),
-    0x67: (1,
-        {
-            0x00: (0,'jalr','r'),
-        }),
-    0x63: (1,
-        {
-            0x00: (0,'beq','r'),
-            0x01: (0,'bne','r'),
-            0x04: (0,'blt','r'),
-            0x05: (0,'bge','r'),
-            0x06: (0,'bltu','r'),
-            0x07: (0,'bgeu','r'),
-        }),
-    0x03: (1,
-        {
-            0x00: (0,'lb','r'),
-            0x01: (0,'lh','r'),
-            0x02: (0,'lw','r'),
-            0x03: (0,'ld','x'),
-            0x04: (0,'lbu','r'),
-            0x05: (0,'lhu','r'),
-        }),
-    0x23: (1,
-        {
-            0x00: (0,'sb','r'),
-            0x01: (0,'sh','r'),
-            0x02: (0,'sw','r'),
-        }),
-    0x13: (1,
-        {
-            0x00: (0,'addi','i'),
-            0x02: (0,'slti','i'),
-            0x03: (0,'sltiu','i'),
-            0x04: (0,'xori','i'),
-            0x06: (0,'ori','i'),
-            0x07: (0,'andi','i'),
-            0x01: (2,
-            {
-                0x00: (0,'slli','i'),
-            }),
-            0x05: (2,
-            {
-                0x00: (0,'srli','i'),
-                0x08: (0,'srai','i'),
-            }),
-        }),
-    0x33: (1,
-        {
-            0x00: (2,
-            {
-                0x00: (0,'add','r'),
-                0x20: (0,'sub','r'),
-            }),
-            0x01: (0,'sll','r'),
-            0x02: (0,'slt','r'),
-            0x03: (0,'sltu','r'),
-            0x04: (0,'xor','r'),
-            0x05: (2,
-            {
-                0x00: (0,'srl','r'),
-                0x20: (0,'sra','r'),
-            }),
-            0x06: (0,'or','r'),
-            0x07: (0,'and','r'),
-        }),
+    'xxxxxxxxxxxxxxxxxxxxxxxxx0110111': ['lui  ','x'],
+    'xxxxxxxxxxxxxxxxxxxxxxxxx0010111': ['auipc','x'],
+    'xxxxxxxxxxxxxxxxxxxxxxxxx1101111': ['jal  ','x'],
+    'xxxxxxxxxxxxxxxxx000xxxxx1100111': ['jalr ','x'],
+    'xxxxxxxxxxxxxxxxx000xxxxx1100011': ['beq  ','x'],
+    'xxxxxxxxxxxxxxxxx001xxxxx1100011': ['bne  ','x'],
+    'xxxxxxxxxxxxxxxxx100xxxxx1100011': ['blt  ','x'],
+    'xxxxxxxxxxxxxxxxx101xxxxx1100011': ['bge  ','x'],
+    'xxxxxxxxxxxxxxxxx110xxxxx1100011': ['bltu ','x'],
+    'xxxxxxxxxxxxxxxxx111xxxxx1100011': ['bgeu ','x'],
+    'xxxxxxxxxxxxxxxxx000xxxxx0000011': ['lb   ','x'],
+    'xxxxxxxxxxxxxxxxx001xxxxx0000011': ['lh   ','x'],
+    'xxxxxxxxxxxxxxxxx010xxxxx0000011': ['lw   ','x'],
+    'xxxxxxxxxxxxxxxxx100xxxxx0000011': ['lbu  ','x'],
+    'xxxxxxxxxxxxxxxxx101xxxxx0000011': ['lhu  ','x'],
+    'xxxxxxxxxxxxxxxxx000xxxxx0100011': ['sb   ','x'],
+    'xxxxxxxxxxxxxxxxx001xxxxx0100011': ['sh   ','x'],
+    'xxxxxxxxxxxxxxxxx010xxxxx0100011': ['sw   ','x'],
+    'xxxxxxxxxxxxxxxxx000xxxxx0010011': ['addi ','i'],
+    'xxxxxxxxxxxxxxxxx010xxxxx0010011': ['slti ','x'],
+    'xxxxxxxxxxxxxxxxx011xxxxx0010011': ['sltiu','x'],
+    'xxxxxxxxxxxxxxxxx100xxxxx0010011': ['xori ','x'],
+    'xxxxxxxxxxxxxxxxx110xxxxx0010011': ['ori  ','x'],
+    'xxxxxxxxxxxxxxxxx111xxxxx0010011': ['andi ','x'],
+    '00000xxxxxxxxxxxx001xxxxx0010011': ['slli ','x'],
+    '00000xxxxxxxxxxxx101xxxxx0010011': ['srli ','x'],
+    '01000xxxxxxxxxxxx101xxxxx0010011': ['srai ','x'],
+    '0000000xxxxxxxxxx000xxxxx0110011': ['add  ','r'],
+    '0100000xxxxxxxxxx000xxxxx0110011': ['sub  ','r'],
+    '0000000xxxxxxxxxx001xxxxx0110011': ['sll  ','r'],
+    '0000000xxxxxxxxxx010xxxxx0110011': ['slt  ','r'],
+    '0000000xxxxxxxxxx011xxxxx0110011': ['sltu ','r'],
+    '0000000xxxxxxxxxx100xxxxx0110011': ['xor  ','r'],
+    '0000000xxxxxxxxxx101xxxxx0110011': ['srl  ','r'],
+    '0100000xxxxxxxxxx101xxxxx0110011': ['sra  ','r'],
+    '0000000xxxxxxxxxx110xxxxx0110011': ['or   ','r'],
+    '0000000xxxxxxxxxx111xxxxx0110011': ['and  ','r'],
 }
-
 
 def hexstr(num,size):
     
@@ -85,24 +51,25 @@ def hexstr(num,size):
     os = '0' * (size - len(h)) + h
     return os
 
-def get_opcode(instr):
-    op = instr & 0x0000007F
-    table = opcodes
-    opcode = None
-    if op in table:
-        opcode = table[op]
-        if opcode[0] == 1:
-            f3 = (instr >>12) & 0x00000007
-            if f3 in opcode[1]:
-                opcode = opcode[1][f3]
-                if opcode[0] == 2:
-                    f7 = (instr >> 25) & 0x0000007F
-                    if f7 in opcode[1]:
-                        opcode = opcode[1][f7]
+def binstr(number):
+    binary = bin(number)[2:]
+    while len(binary) <32:
+        binary = '0' + binary
+    return binary
 
-    if opcode and opcode[0] != 0:
-        opcode = None
-    return opcode
+def get_opcode(instr):
+    binary = binstr(instr)
+    for opcode,info in opcodes.items():
+        match = True
+        for o,i in zip(opcode,binary):
+            if o == 'x':
+                continue
+            if o != i:
+                match = False
+                break
+        if match == True:
+            return info
+    return None
 
 def decode_i(instr):
     rd = (instr >> 7)  & 0x0000001F
@@ -130,14 +97,14 @@ def instr_to_string(instr):
     os = ''
     op = get_opcode(instr)
     if op:
-        os += op[1]+ ' '
-        if op[2] == 'i':
+        os += op[0]+ ' '
+        if op[1] == 'i':
             os += decode_i(instr)
-        if op[2] == 'j':
+        if op[1] == 'j':
             os += decode_j(instr)
-        if op[2] == 'r':
+        if op[1] == 'r':
             os += decode_r(instr)
-        if op[2] == 'u':
+        if op[1] == 'u':
             os += decode_u(instr)
         return os
     return 'Unknown'
