@@ -2,48 +2,8 @@
 
 import elf
 import mem
-
+import opcode
 import sys
-
-opcodes = {
-    'xxxxxxxxxxxxxxxxxxxxxxxxx0110111': ['lui  ','x'],
-    'xxxxxxxxxxxxxxxxxxxxxxxxx0010111': ['auipc','x'],
-    'xxxxxxxxxxxxxxxxxxxxxxxxx1101111': ['jal  ','x'],
-    'xxxxxxxxxxxxxxxxx000xxxxx1100111': ['jalr ','x'],
-    'xxxxxxxxxxxxxxxxx000xxxxx1100011': ['beq  ','x'],
-    'xxxxxxxxxxxxxxxxx001xxxxx1100011': ['bne  ','x'],
-    'xxxxxxxxxxxxxxxxx100xxxxx1100011': ['blt  ','x'],
-    'xxxxxxxxxxxxxxxxx101xxxxx1100011': ['bge  ','x'],
-    'xxxxxxxxxxxxxxxxx110xxxxx1100011': ['bltu ','x'],
-    'xxxxxxxxxxxxxxxxx111xxxxx1100011': ['bgeu ','x'],
-    'xxxxxxxxxxxxxxxxx000xxxxx0000011': ['lb   ','x'],
-    'xxxxxxxxxxxxxxxxx001xxxxx0000011': ['lh   ','x'],
-    'xxxxxxxxxxxxxxxxx010xxxxx0000011': ['lw   ','x'],
-    'xxxxxxxxxxxxxxxxx100xxxxx0000011': ['lbu  ','x'],
-    'xxxxxxxxxxxxxxxxx101xxxxx0000011': ['lhu  ','x'],
-    'xxxxxxxxxxxxxxxxx000xxxxx0100011': ['sb   ','x'],
-    'xxxxxxxxxxxxxxxxx001xxxxx0100011': ['sh   ','x'],
-    'xxxxxxxxxxxxxxxxx010xxxxx0100011': ['sw   ','x'],
-    'xxxxxxxxxxxxxxxxx000xxxxx0010011': ['addi ','i'],
-    'xxxxxxxxxxxxxxxxx010xxxxx0010011': ['slti ','x'],
-    'xxxxxxxxxxxxxxxxx011xxxxx0010011': ['sltiu','x'],
-    'xxxxxxxxxxxxxxxxx100xxxxx0010011': ['xori ','x'],
-    'xxxxxxxxxxxxxxxxx110xxxxx0010011': ['ori  ','x'],
-    'xxxxxxxxxxxxxxxxx111xxxxx0010011': ['andi ','x'],
-    '00000xxxxxxxxxxxx001xxxxx0010011': ['slli ','x'],
-    '00000xxxxxxxxxxxx101xxxxx0010011': ['srli ','x'],
-    '01000xxxxxxxxxxxx101xxxxx0010011': ['srai ','x'],
-    '0000000xxxxxxxxxx000xxxxx0110011': ['add  ','r'],
-    '0100000xxxxxxxxxx000xxxxx0110011': ['sub  ','r'],
-    '0000000xxxxxxxxxx001xxxxx0110011': ['sll  ','r'],
-    '0000000xxxxxxxxxx010xxxxx0110011': ['slt  ','r'],
-    '0000000xxxxxxxxxx011xxxxx0110011': ['sltu ','r'],
-    '0000000xxxxxxxxxx100xxxxx0110011': ['xor  ','r'],
-    '0000000xxxxxxxxxx101xxxxx0110011': ['srl  ','r'],
-    '0100000xxxxxxxxxx101xxxxx0110011': ['sra  ','r'],
-    '0000000xxxxxxxxxx110xxxxx0110011': ['or   ','r'],
-    '0000000xxxxxxxxxx111xxxxx0110011': ['and  ','r'],
-}
 
 def hexstr(num,size):
     
@@ -57,55 +17,64 @@ def binstr(number):
         binary = '0' + binary
     return binary
 
-def get_opcode(instr):
-    binary = binstr(instr)
-    for opcode,info in opcodes.items():
-        match = True
-        for o,i in zip(opcode,binary):
-            if o == 'x':
-                continue
-            if o != i:
-                match = False
-                break
-        if match == True:
-            return info
-    return None
+def decode_l(instr):
+    rd = opcode.get_rd(instr)
+    rs1 = opcode.get_rs1(instr)
+    rs2 = opcode.get_rs2(instr)
+    imm = opcode.get_imm12(instr)
+    return '{}, {}({})'.format(opcode.name_register(rd),imm,opcode.name_register(rs1))
+
+def decode_s(instr):
+    rd = opcode.get_rd(instr)
+    rs1 = opcode.get_rs1(instr)
+    rs2 = opcode.get_rs2(instr)
+    imm = opcode.get_simm12(instr)
+    return '{}, {}({})'.format(opcode.name_register(rs1),imm,opcode.name_register(rs2))
 
 def decode_i(instr):
-    rd = (instr >> 7)  & 0x0000001F
-    rs = (instr >> 15) & 0x0000001F
-    imm = instr >> 20
-    return 'x{}, x{}, {}'.format(str(rd),str(rs),hexstr(imm,8))
+    rd = opcode.get_rd(instr)
+    rs1 = opcode.get_rs1(instr)
+    rs2 = opcode.get_rs2(instr)
+    imm = opcode.get_imm12(instr)
+    return '{}, {}, {}'.format(opcode.name_register(rd),opcode.name_register(rs1),imm)
     
 def decode_j(instr):
-    rd = (instr >> 7)    & 0x0000001F
-    imm = ((instr >> 20) & 0x000003FE) | ((instr >> 9) & 0x00000800) | ((instr >> 0) & 0x000FF000)
-    return 'x{}, {}'.format(str(rd),hexstr(imm,8))
+    rd = opcode.get_rd(instr)
+    rs1 = opcode.get_rs1(instr)
+    rs2 = opcode.get_rs2(instr)
+    imm = opcode.get_jimm20(instr)
+    return 'x{}, {}'.format(opcode.name_register(rd),hexstr(imm,8))
 
 def decode_r(instr):
-    rd =  (instr >> 7)  & 0x0000001F
-    rs1 = (instr >> 15) & 0x0000001F
-    rs2 = (instr >> 20) & 0x0000001F
-    return 'x{}, x{}, x{}'.format(rd,rs1,rs2)
+    rd = opcode.get_rd(instr)
+    rs1 = opcode.get_rs1(instr)
+    rs2 = opcode.get_rs2(instr)
+    return '{}, {}, {}'.format(opcode.name_register(rd),opcode.name_register(rs1),opcode.name_register(rs2))
     
 def decode_u(instr):
-    rd = (instr >> 7)   & 0x0000001F
-    imm = (instr >> 12) & 0x000FFFFF
-    return 'x{}, {}'.format(rd,hex(imm))
+    rd = opcode.get_rd(instr)
+    rs1 = opcode.get_rs1(instr)
+    rs2 = opcode.get_rs2(instr)
+    imm = opcode.get_imm20(instr)
+    return '{}, {}'.format(opcode.name_register(rd),imm)
 
 def instr_to_string(instr):
     os = ''
-    op = get_opcode(instr)
+    op = opcode.match_opcode(instr)
     if op:
         os += op[0]+ ' '
         if op[1] == 'i':
             os += decode_i(instr)
+        if op[1] == 'l':
+            os += decode_l(instr)
         if op[1] == 'j':
             os += decode_j(instr)
         if op[1] == 'r':
             os += decode_r(instr)
         if op[1] == 'u':
             os += decode_u(instr)
+        if op[1] == 's':
+            os += decode_s(instr)
         return os
     return 'Unknown'
 
