@@ -97,3 +97,10 @@ def get_simm12(instr):
     
 def get_limm12(instr):
     pass
+    
+def get_funct3(instr):
+    f3 = (instr >> 12) & 0x00000007
+    return f3
+    
+def get_funct7(instr):
+    f7 = (instr >> 25) & 0x0000007F
