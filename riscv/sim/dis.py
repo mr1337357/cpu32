@@ -17,19 +17,11 @@ def binstr(number):
         binary = '0' + binary
     return binary
 
-def decode_l(instr):
+def decode_r(instr):
     rd = opcode.get_rd(instr)
     rs1 = opcode.get_rs1(instr)
     rs2 = opcode.get_rs2(instr)
-    imm = opcode.get_imm12(instr)
-    return '{}, {}({})'.format(opcode.name_register(rd),imm,opcode.name_register(rs1))
-
-def decode_s(instr):
-    rd = opcode.get_rd(instr)
-    rs1 = opcode.get_rs1(instr)
-    rs2 = opcode.get_rs2(instr)
-    imm = opcode.get_simm12(instr)
-    return '{}, {}({})'.format(opcode.name_register(rs1),imm,opcode.name_register(rs2))
+    return '{}, {}, {}'.format(opcode.name_register(rd),opcode.name_register(rs1),opcode.name_register(rs2))
 
 def decode_i(instr):
     rd = opcode.get_rd(instr)
@@ -37,6 +29,20 @@ def decode_i(instr):
     rs2 = opcode.get_rs2(instr)
     imm = opcode.get_imm12(instr)
     return '{}, {}, {}'.format(opcode.name_register(rd),opcode.name_register(rs1),imm)
+
+def decode_s(instr):
+    rd = opcode.get_rd(instr)
+    rs1 = opcode.get_rs1(instr)
+    rs2 = opcode.get_rs2(instr)
+    imm = opcode.get_simm12(instr)
+    return '{}, {}({})'.format(opcode.name_register(rs1),imm,opcode.name_register(rs2))
+    
+def decode_u(instr):
+    rd = opcode.get_rd(instr)
+    rs1 = opcode.get_rs1(instr)
+    rs2 = opcode.get_rs2(instr)
+    imm = opcode.get_imm20(instr)
+    return '{}, {}'.format(opcode.name_register(rd),imm)
     
 def decode_j(instr):
     rd = opcode.get_rd(instr)
@@ -45,18 +51,12 @@ def decode_j(instr):
     imm = opcode.get_jimm20(instr)
     return 'x{}, {}'.format(opcode.name_register(rd),hexstr(imm,8))
 
-def decode_r(instr):
+def decode_l(instr):
     rd = opcode.get_rd(instr)
     rs1 = opcode.get_rs1(instr)
     rs2 = opcode.get_rs2(instr)
-    return '{}, {}, {}'.format(opcode.name_register(rd),opcode.name_register(rs1),opcode.name_register(rs2))
-    
-def decode_u(instr):
-    rd = opcode.get_rd(instr)
-    rs1 = opcode.get_rs1(instr)
-    rs2 = opcode.get_rs2(instr)
-    imm = opcode.get_imm20(instr)
-    return '{}, {}'.format(opcode.name_register(rd),imm)
+    imm = opcode.get_imm12(instr)
+    return '{}, {}({})'.format(opcode.name_register(rd),imm,opcode.name_register(rs1))
 
 def instr_to_string(instr):
     os = ''
