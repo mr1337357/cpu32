@@ -1,0 +1,63 @@
+
+math:     file format elf32-littleriscv
+
+
+Disassembly of section .text:
+
+00010094 <subtract>:
+   10094:	fe010113          	addi	sp,sp,-32
+   10098:	00812e23          	sw	s0,28(sp)
+   1009c:	02010413          	addi	s0,sp,32
+   100a0:	fea42623          	sw	a0,-20(s0)
+   100a4:	feb42423          	sw	a1,-24(s0)
+   100a8:	fec42703          	lw	a4,-20(s0)
+   100ac:	fe842783          	lw	a5,-24(s0)
+   100b0:	40f707b3          	sub	a5,a4,a5
+   100b4:	00078513          	mv	a0,a5
+   100b8:	01c12403          	lw	s0,28(sp)
+   100bc:	02010113          	addi	sp,sp,32
+   100c0:	00008067          	ret
+
+000100c4 <main>:
+   100c4:	fd010113          	addi	sp,sp,-48
+   100c8:	02112623          	sw	ra,44(sp)
+   100cc:	02812423          	sw	s0,40(sp)
+   100d0:	03010413          	addi	s0,sp,48
+   100d4:	fca42e23          	sw	a0,-36(s0)
+   100d8:	fcb42c23          	sw	a1,-40(s0)
+   100dc:	000107b7          	lui	a5,0x10
+   100e0:	16478793          	addi	a5,a5,356 # 10164 <_start+0x30>
+   100e4:	fef42623          	sw	a5,-20(s0)
+   100e8:	000807b7          	lui	a5,0x80
+   100ec:	52078793          	addi	a5,a5,1312 # 80520 <__global_pointer$+0x6ebb7>
+   100f0:	fef42423          	sw	a5,-24(s0)
+   100f4:	16d00793          	li	a5,365
+   100f8:	fef42223          	sw	a5,-28(s0)
+   100fc:	fe442583          	lw	a1,-28(s0)
+   10100:	fe842503          	lw	a0,-24(s0)
+   10104:	f91ff0ef          	jal	ra,10094 <subtract>
+   10108:	fea42023          	sw	a0,-32(s0)
+   1010c:	fec42783          	lw	a5,-20(s0)
+   10110:	00178793          	addi	a5,a5,1
+   10114:	06700713          	li	a4,103
+   10118:	00e78023          	sb	a4,0(a5)
+   1011c:	00000793          	li	a5,0
+   10120:	00078513          	mv	a0,a5
+   10124:	02c12083          	lw	ra,44(sp)
+   10128:	02812403          	lw	s0,40(sp)
+   1012c:	03010113          	addi	sp,sp,48
+   10130:	00008067          	ret
+
+00010134 <_start>:
+   10134:	ff010113          	addi	sp,sp,-16
+   10138:	00112623          	sw	ra,12(sp)
+   1013c:	00812423          	sw	s0,8(sp)
+   10140:	01010413          	addi	s0,sp,16
+   10144:	00000593          	li	a1,0
+   10148:	00000513          	li	a0,0
+   1014c:	f79ff0ef          	jal	ra,100c4 <main>
+   10150:	00000013          	nop
+   10154:	00c12083          	lw	ra,12(sp)
+   10158:	00812403          	lw	s0,8(sp)
+   1015c:	01010113          	addi	sp,sp,16
+   10160:	00008067          	ret

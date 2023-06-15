@@ -4,7 +4,7 @@ export LD=${PREFIX}ld
 export OD=${PREFIX}objdump
 
 
-export CFLAGS="-g"
+export CFLAGS="-g -static"
 
 cd app/
 
@@ -25,7 +25,7 @@ export CFLAGS="-nostdlib -march=rv32i -mabi=ilp32"
 export LDFLAGS="-nostdlib -march=rv32i -mabi=ilp32"
 
 cd native/
-for prog in add
+for prog in add math
 do
   make $prog.o
   make $prog
