@@ -1,0 +1,32 @@
+main:
+00010094: fd010113 addi  sp, sp, -48
+00010098: 02812623 sw    sp, 44(s0)
+0001009c: 03010413 addi  s0, sp, 48
+000100a0: fca42e23 sw    s0, -36(a0)
+000100a4: fcb42c23 sw    s0, -40(a1)
+000100a8: 00100793 addi  a5, zero, 1
+000100ac: fef42623 sw    s0, -20(a5)
+000100b0: 00200793 addi  a5, zero, 2
+000100b4: fef42423 sw    s0, -24(a5)
+000100b8: fec42703 lw    a4, -20(s0)
+000100bc: fe842783 lw    a5, -24(s0)
+000100c0: 00f707b3 add   a5, a4, a5
+000100c4: fef42223 sw    s0, -28(a5)
+000100c8: 00000793 addi  a5, zero, 0
+000100cc: 00078513 addi  a0, a5, 0
+000100d0: 02c12403 lw    s0, 44(sp)
+000100d4: 03010113 addi  sp, sp, 48
+000100d8: 00008067 jalr  zero, 0(ra)
+_start:
+000100dc: ff010113 addi  sp, sp, -16
+000100e0: 00112623 sw    sp, 12(ra)
+000100e4: 00812423 sw    sp, 8(s0)
+000100e8: 01010413 addi  s0, sp, 16
+000100ec: 00000593 addi  a1, zero, 0
+000100f0: 00000513 addi  a0, zero, 0
+000100f4: fa1ff0ef jal   ra, ffffffa0
+000100f8: 00000013 addi  zero, zero, 0
+000100fc: 00c12083 lw    ra, 12(sp)
+00010100: 00812403 lw    s0, 8(sp)
+00010104: 01010113 addi  sp, sp, 16
+00010108: 00008067 jalr  zero, 0(ra)

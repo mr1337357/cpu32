@@ -1,10 +1,4 @@
-
-add:     file format elf32-littleriscv
-
-
-Disassembly of section .text:
-
-00010094 <main>:
+main:
    10094:	fd010113          	addi	sp,sp,-48
    10098:	02812623          	sw	s0,44(sp)
    1009c:	03010413          	addi	s0,sp,48
@@ -23,3 +17,17 @@ Disassembly of section .text:
    100d0:	02c12403          	lw	s0,44(sp)
    100d4:	03010113          	addi	sp,sp,48
    100d8:	00008067          	ret
+
+_start:
+   100dc:	ff010113          	addi	sp,sp,-16
+   100e0:	00112623          	sw	ra,12(sp)
+   100e4:	00812423          	sw	s0,8(sp)
+   100e8:	01010413          	addi	s0,sp,16
+   100ec:	00000593          	li	a1,0
+   100f0:	00000513          	li	a0,0
+   100f4:	fa1ff0ef          	jal	ra,10094 <main>
+   100f8:	00000013          	nop
+   100fc:	00c12083          	lw	ra,12(sp)
+   10100:	00812403          	lw	s0,8(sp)
+   10104:	01010113          	addi	sp,sp,16
+   10108:	00008067          	ret

@@ -24,14 +24,18 @@ class mem:
         self.regions.append(region)
         
     def write(self,address,value):
+        value &= 0xFF
         for region in self.regions:
             if address >= region.start:
                 if address <= region.end:
                     region.mem[address-region.start] = value
+                    return
+        raise Exception('not a valid address {}'.format(hex(address)))
+        
     
     def read(self,address):
         for region in self.regions:
             if address >= region.start:
                 if address <= region.end:
-                    return region.mem[address-region.start]
-        return None
+                    return region.mem[address-region.start]                
+        raise Exception('not a valid address {}'.format(hex(address)))

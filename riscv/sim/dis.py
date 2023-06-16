@@ -6,7 +6,8 @@ import opcode
 import sys
 
 def hexstr(num,size):
-    
+    if num < 0:
+        num += 2**32
     h = hex(num)[2:]
     os = '0' * (size - len(h)) + h
     return os
@@ -49,7 +50,7 @@ def decode_j(instr):
     rs1 = opcode.get_rs1(instr)
     rs2 = opcode.get_rs2(instr)
     imm = opcode.get_jimm20(instr)
-    return 'x{}, {}'.format(opcode.name_register(rd),hexstr(imm,8))
+    return '{}, {}'.format(opcode.name_register(rd),hexstr(imm,8))
 
 def decode_l(instr):
     rd = opcode.get_rd(instr)

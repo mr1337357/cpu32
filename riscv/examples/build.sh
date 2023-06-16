@@ -4,11 +4,15 @@ export LD=${PREFIX}ld
 export OD=${PREFIX}objdump
 
 
-export CFLAGS="-g -static"
+export CFLAGS="-g -march=rv64id -mabi=lp64d"
+export LDFLAGS="-march=rv64id -mabi=lp64d"
+
+rm app/*.o
+rm native/*.o
 
 cd app/
 
-for prog in hello_world
+for prog in hello_world hello_puts
 do
   make $prog.o
   make $prog

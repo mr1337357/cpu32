@@ -16,6 +16,36 @@ class uint32:
             return uint32(self.value-other.value)
         except:
             return uint32(self.value-other)
+            
+    def __and__(self,other):
+        try:
+            return uint32(self.value & other.value)
+        except:
+            return uint32(self.value & other)
+        
+    def __gt__(self,other):
+        try:
+            return self.value > other.value
+        except:
+            return self.value > other
+            
+    def __ge__(self,other):
+        return self > other - 1
+        
+    def __lt__(self,other):
+        try:
+            return self.value < other.value
+        except:
+            return self.value < other
+    
+    def __le__(self,other):
+        return self < other + 1
+        
+    def __rshift__(self,other):
+        try:
+            return uint32(self.value >> other.value)
+        except:
+            return uint32(self.value >> other)
         
     def __int__(self):
         return self.value

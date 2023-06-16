@@ -1,5 +1,5 @@
 
-hello_world:     file format elf64-littleriscv
+hello_puts:     file format elf64-littleriscv
 
 
 Disassembly of section .plt:
@@ -20,9 +20,9 @@ Disassembly of section .plt:
  598:	000e0367          	jalr	t1,t3
  59c:	00000013          	nop
 
-00000000000005a0 <printf@plt>:
+00000000000005a0 <puts@plt>:
  5a0:	00002e17          	auipc	t3,0x2
- 5a4:	a80e3e03          	ld	t3,-1408(t3) # 2020 <printf@GLIBC_2.27>
+ 5a4:	a80e3e03          	ld	t3,-1408(t3) # 2020 <puts@GLIBC_2.27>
  5a8:	000e0367          	jalr	t1,t3
  5ac:	00000013          	nop
 
@@ -105,26 +105,21 @@ Disassembly of section .text:
 0000000000000668 <main>:
 #include <stdio.h>
 
-int main(int argc,char **argv)
+int main()
 {
- 668:	fe010113          	addi	sp,sp,-32
- 66c:	00113c23          	sd	ra,24(sp)
- 670:	00813823          	sd	s0,16(sp)
- 674:	02010413          	addi	s0,sp,32
- 678:	00050793          	mv	a5,a0
- 67c:	feb43023          	sd	a1,-32(s0)
- 680:	fef42623          	sw	a5,-20(s0)
-  printf("Hello %s\n","world");
- 684:	00000597          	auipc	a1,0x0
- 688:	03458593          	addi	a1,a1,52 # 6b8 <_IO_stdin_used+0x8>
- 68c:	00000517          	auipc	a0,0x0
- 690:	03450513          	addi	a0,a0,52 # 6c0 <_IO_stdin_used+0x10>
- 694:	f0dff0ef          	jal	ra,5a0 <printf@plt>
-  return 0;
- 698:	00000793          	li	a5,0
+ 668:	ff010113          	addi	sp,sp,-16
+ 66c:	00113423          	sd	ra,8(sp)
+ 670:	00813023          	sd	s0,0(sp)
+ 674:	01010413          	addi	s0,sp,16
+	puts("test\n");
+ 678:	00000517          	auipc	a0,0x0
+ 67c:	03050513          	addi	a0,a0,48 # 6a8 <_IO_stdin_used+0x8>
+ 680:	f21ff0ef          	jal	ra,5a0 <puts@plt>
+	return 0;
+ 684:	00000793          	li	a5,0
 }
- 69c:	00078513          	mv	a0,a5
- 6a0:	01813083          	ld	ra,24(sp)
- 6a4:	01013403          	ld	s0,16(sp)
- 6a8:	02010113          	addi	sp,sp,32
- 6ac:	00008067          	ret
+ 688:	00078513          	mv	a0,a5
+ 68c:	00813083          	ld	ra,8(sp)
+ 690:	00013403          	ld	s0,0(sp)
+ 694:	01010113          	addi	sp,sp,16
+ 698:	00008067          	ret

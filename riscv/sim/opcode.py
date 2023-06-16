@@ -1,7 +1,7 @@
 opcodes = {
-    'xxxxxxxxxxxxxxxxxxxxxxxxx0110111': ['lui  ','x'],
-    'xxxxxxxxxxxxxxxxxxxxxxxxx0010111': ['auipc','x'],
-    'xxxxxxxxxxxxxxxxxxxxxxxxx1101111': ['jal  ','x'],
+    'xxxxxxxxxxxxxxxxxxxxxxxxx0110111': ['lui  ','u'],
+    'xxxxxxxxxxxxxxxxxxxxxxxxx0010111': ['auipc','u'],
+    'xxxxxxxxxxxxxxxxxxxxxxxxx1101111': ['jal  ','j'],
     'xxxxxxxxxxxxxxxxx000xxxxx1100111': ['jalr ','l'],
     'xxxxxxxxxxxxxxxxx000xxxxx1100011': ['beq  ','j'],
     'xxxxxxxxxxxxxxxxx001xxxxx1100011': ['bne  ','j'],
@@ -66,7 +66,10 @@ def match_opcode(instr):
         if match == True:
             return info
     return None
-    
+
+def get_op(instr):
+    return instr & 0x0000007F    
+
 def get_rd(instr):
     return (instr >>  7) & 0x0000001F
     
@@ -77,7 +80,10 @@ def get_rs2(instr):
     return (instr >> 20) & 0x0000001F
     
 def get_imm20(instr):
-    return (instr >>  0) & 0xFFFFF000
+    imm = (instr >>  12) & 0x000FFFFF
+    if imm & 0x00080000:
+        imm -= 0x00100000
+    return imm
 
 def get_imm12(instr):
     imm = (instr >> 20) & 0x00000FFF
@@ -86,7 +92,9 @@ def get_imm12(instr):
     return imm
 
 def get_jimm20(instr):
-    imm = ((instr >> 20) & 0x000003FE) | ((instr >> 9) & 0x00000800) | ((instr >> 0) & 0x000FF000)
+    imm = ((instr >> 20) & 0x000007FE) | ((instr >> 9) & 0x00000800) | ((instr >> 0) & 0x000FF000)
+    if imm & 0x00080000:
+        imm -= 0x00100000
     return imm
     
 def get_simm12(instr):
@@ -104,3 +112,4 @@ def get_funct3(instr):
     
 def get_funct7(instr):
     f7 = (instr >> 25) & 0x0000007F
+    return f7
