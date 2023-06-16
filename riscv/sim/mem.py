@@ -39,3 +39,16 @@ class mem:
                 if address <= region.end:
                     return region.mem[address-region.start]                
         raise Exception('not a valid address {}'.format(hex(address)))
+        
+    def dump(self):
+        dumpfile = open('memdump','w')
+        for region in self.regions:
+            addr = region.start
+            while addr < region.end:
+                dumpfile.write('{}: '.format(hex(addr)))
+                for i in range(16):
+                    if addr > region.end:
+                        break
+                    dumpfile.write('{} '.format(hex(self.read(addr)+256)[3:]))
+                    addr += 1
+                dumpfile.write('\n')

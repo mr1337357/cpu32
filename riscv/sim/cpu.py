@@ -87,7 +87,7 @@ class cpu:
             rv = self.mem.read(addr)
             self.registers[rd] = uint32(rv)
         elif fun == 0x02:
-            rv = self.mem.read(addr) + (self.mem.read(addr+1) << 8) + (self.mem.read(addr+1) << 16) + (self.mem.read(addr+1) << 24)
+            rv = self.mem.read(addr) + (self.mem.read(addr+1) << 8) + (self.mem.read(addr+2) << 16) + (self.mem.read(addr+3) << 24)
             self.registers[rd] = uint32(rv)
         else:
             raise Exception('unimplemented')
@@ -127,5 +127,5 @@ class cpu:
     def step(self):
         self.fetch()
         res = self.execute()
-        print(hex(self.pc)+' '+repr(self.registers))
+        #print(hex(self.pc)+' '+repr(self.registers))
         return res
