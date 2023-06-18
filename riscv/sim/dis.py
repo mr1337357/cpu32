@@ -61,7 +61,7 @@ def decode_l(instr):
 
 def instr_to_string(instr):
     os = ''
-    op = opcode.match_opcode(instr)
+    op = opcode.match_opcode(instr,'ic')
     if op:
         os += op[0]+ ' '
         if op[1] == 'i':

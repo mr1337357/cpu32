@@ -38,6 +38,32 @@ opcodes = {
     '0000000xxxxxxxxxx111xxxxx0110011': ['and  ','r'],
 }
 
+opcodes_c = {
+    'xxxxxxxxxxxxxxxx000xxxxxxxxxxx00': ['addi','cx'],
+    'xxxxxxxxxxxxxxxx001xxxxxxxxxxx00': ['fld','cx'],
+    'xxxxxxxxxxxxxxxx010xxxxxxxxxxx00': ['lw','cx'],
+    'xxxxxxxxxxxxxxxx011xxxxxxxxxxx00': ['flw','cx'],
+    'xxxxxxxxxxxxxxxx101xxxxxxxxxxx00': ['fsd','cx'],
+    'xxxxxxxxxxxxxxxx110xxxxxxxxxxx00': ['sw','cx'],
+    'xxxxxxxxxxxxxxxx111xxxxxxxxxxx00': ['fsw','cx'],
+    'xxxxxxxxxxxxxxxx000xxxxxxxxxxx01': ['addi','cx'],
+    'xxxxxxxxxxxxxxxx001xxxxxxxxxxx01': ['jal','cx'],
+    'xxxxxxxxxxxxxxxx010xxxxxxxxxxx01': ['li','cx'],
+    'xxxxxxxxxxxxxxxx011xxxxxxxxxxx01': ['lui','cx'],
+    'xxxxxxxxxxxxxxxx100xxxxxxxxxxx01': ['misc','cx'],
+    'xxxxxxxxxxxxxxxx101xxxxxxxxxxx01': ['j','cx'],
+    'xxxxxxxxxxxxxxxx110xxxxxxxxxxx01': ['beqz','cx'],
+    'xxxxxxxxxxxxxxxx111xxxxxxxxxxx01': ['bnez','cx'],
+    'xxxxxxxxxxxxxxxx000xxxxxxxxxxx10': ['slli','cx'],
+    'xxxxxxxxxxxxxxxx001xxxxxxxxxxx10': ['fldsp','cx'],
+    'xxxxxxxxxxxxxxxx010xxxxxxxxxxx10': ['lwsp','cx'],
+    'xxxxxxxxxxxxxxxx011xxxxxxxxxxx10': ['flwsp','cx'],
+    'xxxxxxxxxxxxxxxx100xxxxxxxxxxx10': ['jalr*','cx'],
+    'xxxxxxxxxxxxxxxx101xxxxxxxxxxx10': ['fsdsp','cx'],
+    'xxxxxxxxxxxxxxxx110xxxxxxxxxxx10': ['swsp','cx'],
+    'xxxxxxxxxxxxxxxx111xxxxxxxxxxx10': ['fswsp','cx'],
+}
+
 namelist = [
      'zero','ra','sp','gp','tp','t0','t1','t2',
      's0','s1','a0','a1','a2','a3','a4','a5',
@@ -53,18 +79,30 @@ def binstr(number):
         binary = '0' + binary
     return binary
 
-def match_opcode(instr):
+def match_opcode(instr,iset = 'i'):
     binary = binstr(instr)
-    for opcode,info in opcodes.items():
-        match = True
-        for o,i in zip(opcode,binary):
-            if o == 'x':
-                continue
-            if o != i:
-                match = False
-                break
-        if match == True:
-            return info
+    if 'i' in iset:
+        for opcode,info in opcodes.items():
+            match = True
+            for o,i in zip(opcode,binary):
+                if o == 'x':
+                    continue
+                if o != i:
+                    match = False
+                    break
+            if match == True:
+                return info
+    if 'c' in iset:
+        for opcode,info in opcodes_c.items():
+            match = True
+            for o,i in zip(opcode,binary):
+                if o == 'x':
+                    continue
+                if o != i:
+                    match = False
+                    break
+            if match == True:
+                return info
     return None
 
 def get_op(instr):

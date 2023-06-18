@@ -31,6 +31,8 @@ if __name__ == '__main__':
                 break
             if c.pc in bp:
                 break
-    except:
-        pass
+    except Exception as e:
+        import traceback
+        traceback.print_exception(e)
+        print(e)
     m.dump()

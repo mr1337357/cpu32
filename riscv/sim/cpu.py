@@ -70,6 +70,8 @@ class cpu:
         imm20 << 12
         if op == 0x37:
             self.registers[rd] = imm20
+        elif op == 0x17:
+            self.registers[rd] = imm20 + self.pc - 4
         else:
             raise Exception('unimplemented')
         
@@ -94,7 +96,9 @@ class cpu:
 
     def execute(self):
         self.registers[0] = 0
-        op = opcode.match_opcode(self.ir)
+        op = opcode.match_opcode(self.ir,'ic')
+        if not op:
+            return 1
         self.opcode = op
         print(op)
         if op[1] == 'r':
@@ -109,8 +113,6 @@ class cpu:
             self.handle_u()
         elif op[1] == 'l':
             self.handle_l()
-            
-        
         else:
             return 1
         return 0
@@ -126,6 +128,8 @@ class cpu:
         
     def step(self):
         self.fetch()
+        print(hex(self.pc))
+        print(hex(self.ir))
         res = self.execute()
         #print(hex(self.pc)+' '+repr(self.registers))
         return res
