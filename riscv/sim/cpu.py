@@ -21,6 +21,11 @@ class cpu:
                 self.registers[rd] = self.registers[rs1] - self.registers[rs2]
             else:
                 raise Exception('unimplemented type r {} {}'.format(fun3, fun7))
+        elif fun3 == 0x01:
+            self.registers[rd] = self.registers[rs1] << self.registers[rs2]
+        elif fun3 == 0x02:
+            self.registers[rd] = uint32(self.registers[rs1] < self.registers[rs2])
+            
         else:
             raise Exception('unimplemented type r {} {}'.format(fun3, fun7))
 
