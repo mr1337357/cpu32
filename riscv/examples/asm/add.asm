@@ -1,5 +1,6 @@
 .org 0x8000
-start:
+.globl _start
+_start:
     addi sp,sp,-48
     sw   s0,44(sp)
     addi s0,sp,48

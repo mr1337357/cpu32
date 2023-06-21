@@ -41,5 +41,6 @@ export AS=${PREFIX}as
 cd asm/
 for prog in add os
 do
-  ${AS} ${prog}.asm -o ${prog}
+  ${AS} ${prog}.asm -o ${prog}.o
+  ${LD} ${prog}.o -o ${prog}
 done
