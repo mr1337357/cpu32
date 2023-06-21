@@ -34,6 +34,7 @@ use IEEE.STD_LOGIC_UNSIGNED.ALL;
 entity seven_seg is
     Port ( clk : in STD_LOGIC;
            data : in STD_LOGIC_VECTOR (15 downto 0);
+           write : in STD_LOGIC;
            seg : out STD_LOGIC_VECTOR (7 downto 0);
            ssel : out STD_LOGIC_VECTOR (3 downto 0));
 end seven_seg;
@@ -41,26 +42,31 @@ end seven_seg;
 architecture Behavioral of seven_seg is
     signal count : std_logic_vector (12 downto 0) := '0'&x"000";
     signal digit : std_logic_vector (3 downto 0);
+    signal value : std_logic_vector (15 downto 0) := (others => '0');
 begin
     process(clk,count,data)
     begin
         if(rising_edge(clk))
         then
+            if write = '1'
+            then
+                value <= data;
+            end if;
             count <= count + 1;
         end if;
         case count(12 downto 10) is
             when "000"   =>
                 ssel <= "1110";
-                digit  <= data(3  downto  0);
+                digit  <= value(3  downto  0);
             when "010"   =>
                 ssel <= "1101";
-                digit  <= data(7  downto  4);
+                digit  <= value(7  downto  4);
             when "100"   =>
                 ssel <= "1011";
-                digit  <= data(11 downto  8);
+                digit  <= value(11 downto  8);
             when "110"   => 
                 ssel <= "0111";
-                digit  <= data(15 downto 12);
+                digit  <= value(15 downto 12);
             when others => 
                 ssel <= (others => '1');
                 digit <= x"8";

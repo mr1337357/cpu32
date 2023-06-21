@@ -1,11 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<GenRun Id="synth_1" LaunchPart="xc7a35tcpg236-1" LaunchTime="1686246781" LaunchIncrCheckpoint="$PSRCDIR/utils_1/imports/synth_1/basys3top.dcp">
+<GenRun Id="synth_1" LaunchPart="xc7a35tcpg236-1" LaunchTime="1687322132" LaunchIncrCheckpoint="$PSRCDIR/utils_1/imports/synth_1/basys3top.dcp">
   <File Type="PA-TCL" Name="basys3top.tcl"/>
+  <File Type="RDS-PROPCONSTRS" Name="basys3top_drc_synth.rpt"/>
   <File Type="REPORTS-TCL" Name="basys3top_reports.tcl"/>
   <File Type="RDS-RDS" Name="basys3top.vds"/>
   <File Type="RDS-UTIL" Name="basys3top_utilization_synth.rpt"/>
   <File Type="RDS-UTIL-PB" Name="basys3top_utilization_synth.pb"/>
   <File Type="RDS-DCP" Name="basys3top.dcp"/>
+  <File Type="VDS-TIMINGSUMMARY" Name="basys3top_timing_summary_synth.rpt"/>
+  <File Type="VDS-TIMING-PB" Name="basys3top_timing_summary_synth.pb"/>
   <FileSet Name="sources" Type="DesignSrcs" RelSrcDir="$PSRCDIR/sources_1" RelGenDir="$PGENDIR/sources_1">
     <Filter Type="Srcs"/>
     <File Path="$PSRCDIR/sources_1/new/seven_seg.vhd">
@@ -16,6 +19,34 @@
     </File>
     <File Path="$PSRCDIR/sources_1/new/basys3top.vhd">
       <FileInfo>
+        <Attr Name="UsedIn" Val="synthesis"/>
+        <Attr Name="UsedIn" Val="simulation"/>
+      </FileInfo>
+    </File>
+    <File Path="$PSRCDIR/sources_1/new/decoder.vhd">
+      <FileInfo>
+        <Attr Name="AutoDisabled" Val="1"/>
+        <Attr Name="UsedIn" Val="synthesis"/>
+        <Attr Name="UsedIn" Val="simulation"/>
+      </FileInfo>
+    </File>
+    <File Path="$PSRCDIR/sources_1/new/cpu.vhd">
+      <FileInfo>
+        <Attr Name="AutoDisabled" Val="1"/>
+        <Attr Name="UsedIn" Val="synthesis"/>
+        <Attr Name="UsedIn" Val="simulation"/>
+      </FileInfo>
+    </File>
+    <File Path="$PSRCDIR/sources_1/new/registers.vhd">
+      <FileInfo>
+        <Attr Name="AutoDisabled" Val="1"/>
+        <Attr Name="UsedIn" Val="synthesis"/>
+        <Attr Name="UsedIn" Val="simulation"/>
+      </FileInfo>
+    </File>
+    <File Path="$PSRCDIR/sources_1/new/pc.vhd">
+      <FileInfo>
+        <Attr Name="AutoDisabled" Val="1"/>
         <Attr Name="UsedIn" Val="synthesis"/>
         <Attr Name="UsedIn" Val="simulation"/>
       </FileInfo>

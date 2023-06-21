@@ -3,8 +3,8 @@
 # SW Build 3865809 on Sun May  7 15:05:29 MDT 2023
 # IP Build 3864474 on Sun May  7 20:36:21 MDT 2023
 # SharedData Build 3865790 on Sun May 07 13:33:03 MDT 2023
-# Start of session at: Thu Jun  8 10:53:05 2023
-# Process ID: 508
+# Start of session at: Tue Jun 20 21:35:34 2023
+# Process ID: 9348
 # Current directory: C:/Users/misspapaya/projects/cpu32/riscv/riscv_rtl/riscv_rtl.runs/synth_1
 # Command line: vivado.exe -log basys3top.vds -product Vivado -mode batch -messageDb vivado.pb -notrace -source basys3top.tcl
 # Log file: C:/Users/misspapaya/projects/cpu32/riscv/riscv_rtl/riscv_rtl.runs/synth_1/basys3top.vds

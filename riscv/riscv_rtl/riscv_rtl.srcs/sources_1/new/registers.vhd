@@ -56,7 +56,10 @@ begin
         then
             if(we = '1')
             then
-                reg(to_integer(unsigned(wa))) <= wd;
+                if wa /= x"00000000"
+                then
+                    reg(to_integer(unsigned(wa))) <= wd;
+                end if;
             end if;
         end if;
     end process;    

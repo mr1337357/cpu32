@@ -38,9 +38,14 @@ entity basys3top is
 end basys3top;
 
 architecture Behavioral of basys3top is
-    component seven_seg port(clk : in std_logic; data: in std_logic_vector(15 downto 0); seg: out std_logic_vector(7 downto 0); ssel: out std_logic_vector(3 downto 0));
+    component cpu port ( clk : in std_logic; run : in std_logic; rst : in std_logic; rd_data : in std_logic_vector(31 downto 0); addr : out std_logic_vector(31 downto 0); wr_data : out std_logic_vector(31 downto 0); wr_flag : out std_logic_vector(3 downto 0));
+    end component; 
+    component seven_seg port(clk : in std_logic; data: in std_logic_vector(15 downto 0); write: in std_logic; seg: out std_logic_vector(7 downto 0); ssel: out std_logic_vector(3 downto 0));
     end component;
+    component ram port ( clk    : in STD_LOGIC; addr   : in STD_LOGIC_VECTOR (31 downto 0);  w_data : in STD_LOGIC_VECTOR (31 downto 0); r_data : out STD_LOGIC_VECTOR (31 downto 0); write  : in std_logic_vector(3 downto 0) );
+    end component;
+    signal sseg_sel : std_logic;
 begin
-    sseg: seven_seg port map(clk => clk, data => x"1337", seg => seg, ssel => ssel);
+    sseg: seven_seg port map(clk => clk, data => x"1337", write => sseg_sel, seg => seg, ssel => ssel);
 
 end Behavioral;
