@@ -94,6 +94,23 @@ class cpu:
         else:
             raise Exception('unimplemented')
 
+    def decompress(self):
+        ir = 0
+        cop = opcode.get_cop(self.ir)
+        if self.opcode[1] == 'cr':
+            f1 = opcode.get_funct1(self.ir)
+            rs1 = opcode.get_crs1(self.ir)
+            rs2 = opcode.get_crs2(self.ir)
+            if f1 == 0:
+                if rs2 == 0:
+                    ir = 0x00000067 | (rs2 << 7) | (rs1 << 15)
+                else:
+                    ir = 0x00000013 | (rs1 << 7) | (rs2 << 15)
+            if f1 == 1:
+                pass
+            
+        return ir
+
     def execute(self):
         self.registers[0] = 0
         op = opcode.match_opcode(self.ir,'ic')
@@ -101,6 +118,14 @@ class cpu:
             return 1
         self.opcode = op
         print(op)
+        if op[1][0] == 'c':
+            self.ir = self.decompress()
+            print(hex(self.ir))
+            op = opcode.match_opcode(self.ir,'ic')
+            if not op:
+                return 1
+            self.opcode = op
+            print(op)
         if op[1] == 'r':
             self.handle_r()
         elif op[1] == 'i':
@@ -128,7 +153,6 @@ class cpu:
         
     def step(self):
         self.fetch()
-        print(hex(self.pc))
         print(hex(self.ir))
         res = self.execute()
         #print(hex(self.pc)+' '+repr(self.registers))

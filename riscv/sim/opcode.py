@@ -58,7 +58,13 @@ opcodes_c = {
     'xxxxxxxxxxxxxxxx001xxxxxxxxxxx10': ['fldsp','cx'],
     'xxxxxxxxxxxxxxxx010xxxxxxxxxxx10': ['lwsp','cx'],
     'xxxxxxxxxxxxxxxx011xxxxxxxxxxx10': ['flwsp','cx'],
-    'xxxxxxxxxxxxxxxx100xxxxxxxxxxx10': ['jalr*','cx'],
+    
+    'xxxxxxxxxxxxxxxx1000xxxxx0000010': ['c.jr','cr'],
+    'xxxxxxxxxxxxxxxx1000xxxxxxxxxx10': ['c.mv','cr'],
+    'xxxxxxxxxxxxxxxx1001000000000010': ['c.ebreak','cr'],
+    'xxxxxxxxxxxxxxxx1001xxxxx0000010': ['c.jalr','cr'],
+    'xxxxxxxxxxxxxxxx1001xxxxxxxxxx10': ['c.add','cr'],
+    
     'xxxxxxxxxxxxxxxx101xxxxxxxxxxx10': ['fsdsp','cx'],
     'xxxxxxxxxxxxxxxx110xxxxxxxxxxx10': ['swsp','cx'],
     'xxxxxxxxxxxxxxxx111xxxxxxxxxxx10': ['fswsp','cx'],
@@ -108,6 +114,9 @@ def match_opcode(instr,iset = 'i'):
 def get_op(instr):
     return instr & 0x0000007F    
 
+def get_cop(instr):
+    return (instr >> 11) & 0x0000001C | (instr >> 0) & 0x00000003
+
 def get_rd(instr):
     return (instr >>  7) & 0x0000001F
     
@@ -116,6 +125,12 @@ def get_rs1(instr):
     
 def get_rs2(instr):
     return (instr >> 20) & 0x0000001F
+    
+def get_crs1(instr):
+    return (instr >> 7) & 0x0000001F
+    
+def get_crs2(instr):
+    return (instr >> 2) & 0x0000001F
     
 def get_imm20(instr):
     imm = (instr >>  12) & 0x000FFFFF
@@ -143,6 +158,10 @@ def get_simm12(instr):
     
 def get_limm12(instr):
     pass
+
+def get_funct1(instr):
+    f1 = (instr >> 12) & 0x00000001    
+    return f1
     
 def get_funct3(instr):
     f3 = (instr >> 12) & 0x00000007
