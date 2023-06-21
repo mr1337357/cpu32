@@ -29,7 +29,7 @@ export CFLAGS="-nostdlib -march=rv32i -mabi=ilp32"
 export LDFLAGS="-nostdlib -march=rv32i -mabi=ilp32"
 
 cd native/
-for prog in add math
+for prog in add math calls
 do
   make $prog.o
   make $prog
@@ -39,7 +39,7 @@ cd ..
 
 export AS=${PREFIX}as
 cd asm/
-for prog in add os
+for prog in add os gamut
 do
   ${AS} ${prog}.asm -o ${prog}.o
   ${LD} ${prog}.o -o ${prog}
