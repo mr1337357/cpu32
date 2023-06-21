@@ -35,3 +35,11 @@ do
   make $prog
   $OD -S $prog > $prog.dis
 done
+cd ..
+
+export AS=${PREFIX}as
+cd asm/
+for prog in add os
+do
+  ${AS} ${prog}.asm -o ${prog}
+done
