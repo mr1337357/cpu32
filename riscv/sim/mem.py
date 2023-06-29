@@ -40,6 +40,7 @@ class mem:
                     return region.mem[address-region.start]                
         raise Exception('not a valid address {}'.format(hex(address)))
         
+        
     def dump(self):
         dumpfile = open('memdump','w')
         for region in self.regions:

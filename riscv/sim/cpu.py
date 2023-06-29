@@ -2,11 +2,12 @@ import opcode
 from rvtypes import uint32
 
 class cpu:
-    def __init__(self,mem):
+    def __init__(self,mem,arch='rv32i'):
         self.mem = mem
         self.ir = uint32(0)
         self.pc = uint32(0)
         self.registers = [uint32(0)] * 32
+        self.isize = 0
 
     def handle_r(self):
         rd = opcode.get_rd(self.ir)
@@ -55,11 +56,15 @@ class cpu:
     def handle_j(self):
         rd = opcode.get_rd(self.ir)
         imm20 = opcode.get_jimm20(self.ir)
+        jimm12 = opcode.get_jimm12(self.ir)
         op = opcode.get_op(self.ir)
-        if op == 0x6F:
+        if op == 0x6F: 
             self.registers[rd] = uint32(self.pc)
             self.pc += imm20
-            self.pc -= 4 #hack (need to probably redo all instructions with current pc as input)
+            self.isize = 0
+        if op == 0x63:
+            if self.registers[rs1] == self.registers[rs2]:
+                self.pc += imm20
         else:
             raise Exception('unimplemented')
         
@@ -71,7 +76,7 @@ class cpu:
         if op == 0x37:
             self.registers[rd] = imm20
         elif op == 0x17:
-            self.registers[rd] = imm20 + self.pc - 4
+            self.registers[rd] = imm20 + self.pc
         else:
             raise Exception('unimplemented')
         
@@ -145,15 +150,16 @@ class cpu:
     def fetch(self):
         self.ir = self.mem.read(self.pc)
         self.ir += self.mem.read(self.pc+1) * 256
-        self.pc += 2
+        self.isize = 2
         if self.ir & 0x03 == 0x03:
-            self.ir += self.mem.read(self.pc) * 65536
-            self.ir += self.mem.read(self.pc+1) * 16777216
-            self.pc += 2
+            self.ir += self.mem.read(self.pc+2) * 65536
+            self.ir += self.mem.read(self.pc+3) * 16777216
+            self.isize += 2
         
     def step(self):
         self.fetch()
         print(hex(self.ir))
         res = self.execute()
+        self.pc += self.isize
         #print(hex(self.pc)+' '+repr(self.registers))
         return res

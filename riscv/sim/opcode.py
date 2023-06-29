@@ -158,6 +158,9 @@ def get_simm12(instr):
     
 def get_limm12(instr):
     pass
+    
+def get_bimm12(instr):
+    imm = (instr >> 20) & 0x00000000
 
 def get_funct1(instr):
     f1 = (instr >> 12) & 0x00000001    
