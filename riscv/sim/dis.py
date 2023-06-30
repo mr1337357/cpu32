@@ -52,6 +52,13 @@ def decode_j(instr):
     imm = opcode.get_jimm20(instr)
     return '{}, {}'.format(opcode.name_register(rd),hexstr(imm,8))
 
+def decode_b(instr):
+    rd = opcode.get_rd(instr)
+    rs1 = opcode.get_rs1(instr)
+    rs2 = opcode.get_rs2(instr)
+    imm = opcode.get_bimm12(instr)
+    return '{}, {}'.format(opcode.name_register(rd),hexstr(imm,8))
+
 def decode_l(instr):
     rd = opcode.get_rd(instr)
     rs1 = opcode.get_rs1(instr)
@@ -76,6 +83,8 @@ def instr_to_string(instr):
             os += decode_u(instr)
         if op[1] == 's':
             os += decode_s(instr)
+        if op[1] == 'b':
+            os += decode_b(instr)
         return os
     return 'Unknown'
 

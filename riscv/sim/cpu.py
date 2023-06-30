@@ -55,16 +55,48 @@ class cpu:
 
     def handle_j(self):
         rd = opcode.get_rd(self.ir)
+        rs1 = opcode.get_rs1(self.ir)
+        rs2 = opcode.get_rs2(self.ir)
+        fun = opcode.get_funct3(self.ir)
         imm20 = opcode.get_jimm20(self.ir)
-        jimm12 = opcode.get_jimm12(self.ir)
         op = opcode.get_op(self.ir)
         if op == 0x6F: 
             self.registers[rd] = uint32(self.pc)
             self.pc += imm20
             self.isize = 0
+        else:
+            print(hex(op))
+            raise Exception('unimplemented')
+
+    def handle_b(self):
+        rd = opcode.get_rd(self.ir)
+        rs1 = opcode.get_rs1(self.ir)
+        rs2 = opcode.get_rs2(self.ir)
+        fun = opcode.get_funct3(self.ir)
+        imm20 = opcode.get_jimm20(self.ir)
+        bimm12 = opcode.get_bimm12(self.ir)
+        op = opcode.get_op(self.ir)
         if op == 0x63:
-            if self.registers[rs1] == self.registers[rs2]:
-                self.pc += imm20
+            if fun == 0x00:
+                if self.registers[rs1] == self.registers[rs2]:
+                    self.pc += bimm12
+                    self.isize = 0
+            elif fun == 0x01:
+                if self.registers[rs1] != self.registers[rs2]:
+                    self.pc += bimm12
+                    self.isize = 0
+            elif fun == 0x04:
+                if self.registers[rs1] < self.registers[rs2]:
+                    self.pc += bimm12
+                    self.isize = 0
+            elif fun == 0x05:
+                if self.registers[rs1] >= self.registers[rs2]:
+                    self.pc += bimm12
+                    self.isize = 0
+                    print(self.registers)
+            else:
+                print(hex(fun))
+                raise Exception('unimplemented')
         else:
             raise Exception('unimplemented')
         
@@ -74,9 +106,9 @@ class cpu:
         op = opcode.get_op(self.ir)
         imm20 << 12
         if op == 0x37:
-            self.registers[rd] = imm20
+            self.registers[rd] = uint32(imm20)
         elif op == 0x17:
-            self.registers[rd] = imm20 + self.pc
+            self.registers[rd] = uint32(imm20 + self.pc)
         else:
             raise Exception('unimplemented')
         
@@ -143,17 +175,19 @@ class cpu:
             self.handle_u()
         elif op[1] == 'l':
             self.handle_l()
+        elif op[1] == 'b':
+            self.handle_b()
         else:
             return 1
         return 0
 
     def fetch(self):
-        self.ir = self.mem.read(self.pc)
-        self.ir += self.mem.read(self.pc+1) * 256
+        self.ir = self.mem.read(self.pc,mode='x')
+        self.ir += self.mem.read(self.pc+1,mode='x') * 256
         self.isize = 2
         if self.ir & 0x03 == 0x03:
-            self.ir += self.mem.read(self.pc+2) * 65536
-            self.ir += self.mem.read(self.pc+3) * 16777216
+            self.ir += self.mem.read(self.pc+2,mode='x') * 65536
+            self.ir += self.mem.read(self.pc+3,mode='x') * 16777216
             self.isize += 2
         
     def step(self):

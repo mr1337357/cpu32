@@ -33,7 +33,7 @@ class mem:
         raise Exception('not a valid address {}'.format(hex(address)))
         
     
-    def read(self,address):
+    def read(self,address,mode='r'):
         for region in self.regions:
             if address >= region.start:
                 if address <= region.end:

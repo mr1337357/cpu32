@@ -27,9 +27,9 @@ _start:
   beq a0, ra, func
   bne a0, a0, func
   blt a0, a0, func
-  bge a0, a0, func
+  bge a0, a1, func
   bltu a0, a0, func
-  bgeu a0, a0, func
+  bgeu a0, a1, func
   jal mem
   add a0, a1, a2
   sub a0, a1, a2

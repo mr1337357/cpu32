@@ -3,12 +3,12 @@ opcodes = {
     'xxxxxxxxxxxxxxxxxxxxxxxxx0010111': ['auipc','u'],
     'xxxxxxxxxxxxxxxxxxxxxxxxx1101111': ['jal  ','j'],
     'xxxxxxxxxxxxxxxxx000xxxxx1100111': ['jalr ','l'],
-    'xxxxxxxxxxxxxxxxx000xxxxx1100011': ['beq  ','j'],
-    'xxxxxxxxxxxxxxxxx001xxxxx1100011': ['bne  ','j'],
-    'xxxxxxxxxxxxxxxxx100xxxxx1100011': ['blt  ','j'],
-    'xxxxxxxxxxxxxxxxx101xxxxx1100011': ['bge  ','j'],
-    'xxxxxxxxxxxxxxxxx110xxxxx1100011': ['bltu ','j'],
-    'xxxxxxxxxxxxxxxxx111xxxxx1100011': ['bgeu ','j'],
+    'xxxxxxxxxxxxxxxxx000xxxxx1100011': ['beq  ','b'],
+    'xxxxxxxxxxxxxxxxx001xxxxx1100011': ['bne  ','b'],
+    'xxxxxxxxxxxxxxxxx100xxxxx1100011': ['blt  ','b'],
+    'xxxxxxxxxxxxxxxxx101xxxxx1100011': ['bge  ','b'],
+    'xxxxxxxxxxxxxxxxx110xxxxx1100011': ['bltu ','b'],
+    'xxxxxxxxxxxxxxxxx111xxxxx1100011': ['bgeu ','b'],
     'xxxxxxxxxxxxxxxxx000xxxxx0000011': ['lb   ','l'],
     'xxxxxxxxxxxxxxxxx001xxxxx0000011': ['lh   ','l'],
     'xxxxxxxxxxxxxxxxx010xxxxx0000011': ['lw   ','l'],
@@ -145,9 +145,15 @@ def get_imm12(instr):
     return imm
 
 def get_jimm20(instr):
-    imm = ((instr >> 20) & 0x000007FE) | ((instr >> 9) & 0x00000800) | ((instr >> 0) & 0x000FF000)
+    imm = ((instr >> 20) & 0x000007FE) | ((instr >>  9) & 0x00000800) | ((instr >>  0) & 0x000FF000)
     if imm & 0x00080000:
         imm -= 0x00100000
+    return imm
+    
+def get_bimm12(instr):
+    imm = ((instr >>  7) & 0x0000001E) | ((instr >> 20) & 0x000007E0) | ((instr <<  4) & 0x00000800) | ((instr >> 19) & 0x00001000)
+    if imm & 0x00001000:
+        imm -= 0x00002000
     return imm
     
 def get_simm12(instr):
@@ -158,9 +164,6 @@ def get_simm12(instr):
     
 def get_limm12(instr):
     pass
-    
-def get_bimm12(instr):
-    imm = (instr >> 20) & 0x00000000
 
 def get_funct1(instr):
     f1 = (instr >> 12) & 0x00000001    
