@@ -43,4 +43,5 @@ for prog in add os gamut
 do
   ${AS} ${prog}.asm -o ${prog}.o
   ${LD} ${prog}.o -o ${prog}
+  ${OD} -S ${prog} > ${prog}.dis
 done

@@ -1,0 +1,59 @@
+
+gamut:     file format elf32-littleriscv
+
+
+Disassembly of section .text:
+
+00010074 <func>:
+   10074:	ff010113          	addi	sp,sp,-16
+   10078:	00112623          	sw	ra,12(sp)
+   1007c:	00812423          	sw	s0,8(sp)
+   10080:	01010413          	addi	s0,sp,16
+   10084:	00000013          	nop
+   10088:	00812403          	lw	s0,8(sp)
+   1008c:	00c12083          	lw	ra,12(sp)
+   10090:	01010113          	addi	sp,sp,16
+   10094:	00008067          	ret
+
+00010098 <mem>:
+   10098:	ff010113          	addi	sp,sp,-16
+   1009c:	00112623          	sw	ra,12(sp)
+   100a0:	00812423          	sw	s0,8(sp)
+   100a4:	01010413          	addi	s0,sp,16
+   100a8:	00500593          	li	a1,5
+   100ac:	00b10223          	sb	a1,4(sp)
+   100b0:	00b11023          	sh	a1,0(sp)
+   100b4:	00c12083          	lw	ra,12(sp)
+   100b8:	00008067          	ret
+
+000100bc <_start>:
+   100bc:	08675537          	lui	a0,0x8675
+   100c0:	30950513          	addi	a0,a0,777 # 8675309 <__global_pointer$+0x86639d5>
+   100c4:	fb1ff0ef          	jal	ra,10074 <func>
+   100c8:	fa1506e3          	beq	a0,ra,10074 <func>
+   100cc:	faa514e3          	bne	a0,a0,10074 <func>
+   100d0:	faa542e3          	blt	a0,a0,10074 <func>
+   100d4:	fab550e3          	bge	a0,a1,10074 <func>
+   100d8:	f8a56ee3          	bltu	a0,a0,10074 <func>
+   100dc:	f8b57ce3          	bgeu	a0,a1,10074 <func>
+   100e0:	fb9ff0ef          	jal	ra,10098 <mem>
+   100e4:	00c58533          	add	a0,a1,a2
+   100e8:	40c58533          	sub	a0,a1,a2
+   100ec:	00c5c533          	xor	a0,a1,a2
+   100f0:	00c5e533          	or	a0,a1,a2
+   100f4:	00c5f533          	and	a0,a1,a2
+   100f8:	00c59533          	sll	a0,a1,a2
+   100fc:	00c5d533          	srl	a0,a1,a2
+   10100:	40c5d533          	sra	a0,a1,a2
+   10104:	00c5a533          	slt	a0,a1,a2
+   10108:	00c5b533          	sltu	a0,a1,a2
+   1010c:	00558513          	addi	a0,a1,5
+   10110:	0055c513          	xori	a0,a1,5
+   10114:	0055e513          	ori	a0,a1,5
+   10118:	0055f513          	andi	a0,a1,5
+   1011c:	00559513          	slli	a0,a1,0x5
+   10120:	0055d513          	srli	a0,a1,0x5
+   10124:	4055d513          	srai	a0,a1,0x5
+   10128:	0055a513          	slti	a0,a1,5
+   1012c:	0055b513          	sltiu	a0,a1,5
+   10130:	00008067          	ret
