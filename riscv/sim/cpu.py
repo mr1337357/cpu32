@@ -1,5 +1,5 @@
 import opcode
-from rvtypes import uint32
+from rvtypes import uint32, int32
 
 class cpu:
     def __init__(self,mem,arch='rv32i'):
@@ -45,7 +45,6 @@ class cpu:
         fun = opcode.get_funct3(self.ir)
         wv = int(self.registers[rs2])
         addr = int(self.registers[rs1] + imm)
-        print(imm,repr(self.registers[rs1]))
         self.mem.write(addr,wv)
         if fun > 0:
             self.mem.write(addr+1,wv>>8)
@@ -86,16 +85,22 @@ class cpu:
                     self.pc += bimm12
                     self.isize = 0
             elif fun == 0x04:
-                if self.registers[rs1] < self.registers[rs2]:
+                if int32(self.registers[rs1]) < int32(self.registers[rs2]):
                     self.pc += bimm12
                     self.isize = 0
             elif fun == 0x05:
+                if int32(self.registers[rs1]) < int32(self.registers[rs2]):
+                    self.pc += bimm12
+                    self.isize = 0
+            elif fun == 0x06:
+                if self.registers[rs1] < self.registers[rs2]:
+                    self.pc += bimm12
+                    self.isize = 0
+            elif fun == 0x07:
                 if self.registers[rs1] >= self.registers[rs2]:
                     self.pc += bimm12
                     self.isize = 0
-                    print(self.registers)
             else:
-                print(hex(fun))
                 raise Exception('unimplemented')
         else:
             raise Exception('unimplemented')
@@ -121,7 +126,7 @@ class cpu:
         op = opcode.get_op(self.ir)
         if op == 0x67: #jalr
             self.pc = int(addr)
-            self.registers[rd] = self.pc
+            self.registers[rd] = uint32(self.pc)
         elif fun == 0x00 or fun == 0x04: #lb lbu
             rv = self.mem.read(addr)
             self.registers[rd] = uint32(rv)
@@ -149,7 +154,7 @@ class cpu:
         return ir
 
     def execute(self):
-        self.registers[0] = 0
+        self.registers[0] = uint32(0)
         op = opcode.match_opcode(self.ir,'ic')
         if not op:
             return 1
