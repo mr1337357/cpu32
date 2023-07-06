@@ -3,29 +3,37 @@
 #include <stdio.h>
 #include <stdint.h>
 
-#pragma pack(1)
-#define EI_NIDENT 16
-typedef uint32_t ElfN_Addr;
-typedef uint32_t ElfN_Off; 
-// https://www.man7.org/linux/man-pages/man5/elf.5.html
-struct ElfHeader {
-    unsigned char e_ident[EI_NIDENT];
-    uint16_t      e_type;
-    uint16_t      e_machine;
-    uint32_t      e_version;
-    ElfN_Addr     e_entry;
-    ElfN_Off      e_phoff;
-    ElfN_Off      e_shoff;
-    uint32_t      e_flags;
-    uint16_t      e_ehsize;
-    uint16_t      e_phentsize;
-    uint16_t      e_phnum;
-    uint16_t      e_shentsize;
-    uint16_t      e_shnum;
-    uint16_t      e_shstrndx;
-};
+#include <stdbool.h>
 
-void show_elf_header (struct ElfHeader* eh) {
+// https://www.man7.org/linux/man-pages/man5/elf.5.html
+#include <elf.h>
+
+// #pragma pack(1)
+
+bool is_elf(const unsigned char* const buf, unsigned int bufsize, bool *is_64bit) {
+    if (bufsize < EI_NIDENT) { 
+        return false;
+    }
+    bool valid = true;
+    if (buf[0] != 0x7f) {// EI_MAG0
+        valid = false;
+    } else if (buf[1] != 'E') { // EI_MAG1
+        valid = false;
+    } else if (buf[2] != 'L') { // EI_MAG2
+        valid= false;
+    } else if (buf[3] != 'F') { // EI_MAG3
+        valid = false;
+    } else if (buf[EI_CLASS] == ELFCLASSNONE) {
+        valid = false;
+    } else if (buf[EI_CLASS] == ELFCLASS64) {
+        *is_64bit = true;
+    } else if (buf[EI_VERSION] == EV_NONE) {
+        valid = false;
+    }
+    return valid;
+}
+
+void show_elf_header (Elf32_Ehdr* eh) {
     printf("e_ident = %s\n", eh -> e_ident);
     printf("e_machine = %x\n", eh -> e_machine);
     printf("e_version = %x\n", eh -> e_version);
@@ -37,30 +45,87 @@ void show_elf_header (struct ElfHeader* eh) {
     return;
 }
 
-// mostly copy and paste
-struct Elf32_SectionHeader {
-    uint32_t   sh_name;
-    uint32_t   sh_type;
-    uint32_t   sh_flags;
-    // Elf32_Addr sh_addr;
-    uint32_t  sh_addr;
-    // Elf32_Off  sh_offset;
-    uint32_t   sh_offset;
-    uint32_t   sh_size;
-    uint32_t   sh_link;
-    uint32_t   sh_info;
-    uint32_t   sh_addralign;
-    uint32_t   sh_entsize;
-};
-
-void show_section_header (struct Elf32_SectionHeader *sh) {
+void print_shdr(const Elf32_Shdr * const sh) {
+    void print_type (uint32_t a) {
+        switch (a) {
+            case SHT_NULL:
+                printf(" (SHT_NULL)\n");
+                break;
+            case SHT_PROGBITS:
+                printf(" (SHT_PROGBITS)\n");
+                break;
+            case SHT_SYMTAB:
+                printf(" (SHT_SYMTAB)\n");
+                break;
+            case SHT_STRTAB:
+                printf(" (SHT_STRTAB)\n");
+                break;
+            case SHT_HASH:
+                printf(" (SHT_HASH)\n");
+                break;
+            case SHT_DYNAMIC:
+                printf(" (SHT_DYNAMIC)\n");
+                break;
+            case SHT_NOTE:
+                printf(" (SHT_NOTE)\n");
+                break;
+            case SHT_NOBITS:
+                printf(" (SHT_NOBITS)\n");
+                break;
+            case SHT_SHLIB:
+                printf(" (SHT_SHLIB)\n");
+                break;
+            case SHT_DYNSYM:
+                printf(" (SHT_DYNSYM)\n");
+                break;
+            case SHT_LOUSER:
+                printf(" (SHT_NOTE)\n");
+                break;
+            case SHT_HIUSER:
+                printf(" (SHT_NOTE)\n");
+                break;
+            default:
+                if (SHT_LOPROC < a && a < SHT_HIPROC) {
+                    printf(" (reserved)\n");
+                }
+                break;
+        }
+    }
     if (sh == NULL) {
-        printf("show_section_header: null ptr\n");
+        printf("print_shdr: null ptr\n");
         return;
     }
-    printf("sh_addr = %x\n", sh -> sh_addr);
-    printf("sh_offset = %x\n", sh -> sh_offset);
-    printf("sh_size = %x\n", sh -> sh_size);
+    const char *names[] = {
+        "sh_name", "sh_type", "sh_flags", "sh_addr", "sh_offset",
+        "sh_size", "sh_link", "sh_info", "sh_addralign", "sh_entsize"
+    };
+    for (unsigned int i = 0; i < 10; ++i) {
+        // all attributes in  the 32-bit version are the same type
+        uint32_t *x = (uint32_t*)((char*)sh + (sizeof(uint32_t) * i));
+        printf("%s = %x", names[i], *x);
+        switch (i) {
+            default:
+                printf("\n");
+                break;
+            case 1: // sh_type
+                print_type(*x);
+                break;
+        }
+    }
+}
+
+void print_phdr(const Elf32_Phdr* const ph) {
+    if (ph == NULL) {
+        return;
+    }
+    const char *names[] = {
+        "p_type", "p_offset", "p_vaddr", "p_paddr",
+        "p_filesz", "p_memsz", "p_flags", "p_align"
+    };
+    for (unsigned int i = 0; i < 8; i++) { // 8 = # of attributes
+        uint32_t *x =(uint32_t*)((char*)ph + (sizeof(uint32_t) * i));
+        printf("%s = %x\n", names[i], *x);
+    }
 }
 
 // generic, load any binary file
@@ -93,49 +158,61 @@ char *loadfile(const char *fname, unsigned int *s) {
     return buf;
 }
 
-struct ELF32_SectionHeader*
-get_section_header(struct ElfHeader *eh, unsigned int i, unsigned int memsize) {
-    struct Elf32_SectionHeader *sh;
-    if (i > eh -> e_shnum) {
-        perror("i exceeds eh -> e_shnum");
+void* init(char * const buf, unsigned int offset, const unsigned int bufsize) {
+    if (buf+offset > buf+bufsize) {
+        printf("invalid (%x, %x)\n", buf+offset, buf+bufsize);
         return NULL;
     }
-    char *mem = eh;
-    unsigned int ith_offset = i * (eh -> e_shentsize);
-    sh = mem + (eh -> e_shoff) + ith_offset;
-    if (sh > mem+memsize) {
-        printf("%x, %x\n", sh, memsize);
-        perror("warning: potential segmentation fault ahead");
-    }
-    return sh;
+    return (buf+offset);
 }
 
-#ifdef __ELF_STANDALONE__
+// print all program and section headers
+void test_00(Elf32_Ehdr * eh, char *buffer, unsigned int bufsize) {
+    for (unsigned int i = 0; i < eh -> e_phnum; ++i) {
+        printf("-- program header %.2i --\n", i);
+        unsigned int offset = i * (eh -> e_phentsize) + eh -> e_phoff;
+        Elf32_Phdr *p = init(buffer, offset, bufsize);
+        print_phdr(p);
+        printf("-----------------------\n");
+    }
+    for (unsigned int i = 0; i < eh -> e_shnum; ++i) {
+        printf("-- section header %.2i --\n", i);
+        Elf32_Shdr *sample;
+        unsigned int offset = i * (eh -> e_shentsize) + eh -> e_shoff;
+        sample = init(buffer, offset, bufsize);
+        print_shdr(sample);
+        printf("-----------------------\n");
+    }
+}
+
+void test_01(Elf32_Ehdr *eh, unsigned int i, const unsigned int bufsize) {
+    char *buf = (char*)eh; // beginning of file
+    // get ith section
+    if (i > eh -> e_shnum) {
+        return;
+    }
+    unsigned int offset = i * (eh -> e_shentsize) + eh -> e_shoff;
+    const  Elf32_Shdr *s = init(buf, offset, bufsize);
+    const unsigned char *section = buf + s -> sh_offset;
+}
 
 int main(int argc, char ** argv) {
     if (argc < 2) {
         printf("usage: program filename\n");
-        return;
+        return 0;
     }
-    char *f = argv[1];
     unsigned int bufsize = 0;
-    char *buffer         = loadfile(f, &bufsize);
-    struct ElfHeader *eh;
-    eh = buffer;
-    show_elf_header(eh);
-    for (unsigned int i = 0; i < eh -> e_shnum; ++i) {
-        printf("-- section header %.2i --\n", i);
-        // struct Elf32_SectionHeader *sh;
-        // unsigned int ith_offset = i * (eh -> e_shentsize);
-        // printf("%x, %x\n", buffer+ith_offset, eh+ith_offset);
-        struct Elf32_SectionHeader *sample;
-        sample = get_section_header(eh, i, bufsize);
-        // sh = buffer + (eh -> e_shoff) + ith_offset;
-        show_section_header(sample);
-        printf("-----------------------\n");
+    char *f      = argv[1];
+    char *buffer = loadfile(f, &bufsize);
+    bool is_64;
+    if (!is_elf(buffer, bufsize, &is_64)) {
+        return 0;
     }
+    Elf32_Ehdr *eh;
+    eh = (Elf32_Ehdr*)buffer;
+    show_elf_header(eh);
+    test_00(eh, buffer, bufsize);
+    test_01(eh, 1, bufsize);
     free(buffer);
     return 0;
 }
-
-#endif //__ELF_STANDALONE__
