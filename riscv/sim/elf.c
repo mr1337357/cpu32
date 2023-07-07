@@ -5,6 +5,9 @@
 
 #include <stdbool.h>
 
+// for memcpy
+#include <string.h>
+
 // https://www.man7.org/linux/man-pages/man5/elf.5.html
 #include <elf.h>
 
@@ -162,24 +165,26 @@ int elf_get_number_of_sections(unsigned char* elf_file, unsigned int len) {
     return no_of_sections;
 }
 
-bool elf_get_section_header(unsigned char *elf_file, unsigned int len, 
-                            unsigned int n, void *sh, bool *is_64bit) {
+void *elf_get_section_header(unsigned char *elf_file, unsigned int len, 
+                            unsigned int n, bool *is_64bit) {
     if (!is_elf(elf_file, len, is_64bit)) {
-        return false;
+        return NULL;
     }
     // to do: use 64 bit elf header if is_64bit
     Elf32_Ehdr *eh;
     eh = (Elf32_Ehdr*)elf_file;
     if (n > (eh -> e_shnum)) {
-        return false;
+        return NULL;
     }
     unsigned int offset = n * (eh -> e_shentsize) + eh -> e_shoff;
-    sh = init(elf_file, len, offset);
+    void *sh = init(elf_file, len, offset);
     if (sh == NULL) {
-        return false;
+        return NULL;
     }
+    return sh;
 }
 
+// implemented before elf_get_section_header
 int elf_get_sh_flags(unsigned char *elf_file, unsigned int len, 
                      unsigned int n) {
     bool is_64bit;
@@ -206,12 +211,39 @@ int elf_copy_section_to_array(unsigned char *elf_file, unsigned int len,
                               int n, uint8_t *array) {
     // assume  array has not been allocated and will be freed by  callee
     bool is_64bit;
-    void *section_header;
-    bool is_ok = elf_get_section_header(
-        elf_file, len, n, section_header, &is_64bit);
-    if (!is_ok) {
+    void *section_header = elf_get_section_header(elf_file, len, n, &is_64bit);
+    if (section_header == NULL) {
         return -1;
     }
+    unsigned int offset;
+    unsigned int size;
+    unsigned int type;
+    if (is_64bit) {
+        return -1; // not yet impelmented
+    } else {
+        Elf32_Shdr *sh = section_header;
+        type   = sh -> sh_type;
+        offset = sh -> sh_offset;
+        size   = sh -> sh_size;
+        print_shdr(sh);
+        // printf("%x, %x, %x\n", offset, sh -> sh_offset, len);
+    }
+    if (size <= 0) {
+        return size; // hits for SHT_NULL or SHT_NOBITS
+    }
+    unsigned char* source = elf_file + offset;
+    if ((source + size) > (elf_file + len)) {
+        // section as specified goes beyond buffer (seg fault)
+        return -1;
+    }
+    array = (uint8_t*)malloc(sizeof(uint8_t) * (size));
+    memcpy(array, source, size);
+    printf("%p\n",array);
+    // for (unsigned int i =0; i < size ; i++) {
+    //     printf("%x, ", array[i]);
+    // }
+    // printf("\n");
+    return size;
 }
 
 // demo/testing purposes
@@ -295,6 +327,15 @@ int main(int argc, char ** argv) {
     show_elf_header(eh);
     test_00(eh, buffer, bufsize);
     test_01(buffer, bufsize);
+    uint8_t *test = NULL;
+    int c = elf_copy_section_to_array(buffer, bufsize, 1, test);
+    printf("%p\n",test);
+    if (test != NULL) {
+        for (unsigned int i=0; i < c; i++) {
+            printf("%x\n", test[i]);
+        }
+    }
+    free(test);
     free(buffer);
     return 0;
 }
