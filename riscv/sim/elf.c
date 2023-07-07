@@ -128,6 +128,55 @@ void print_phdr(const Elf32_Phdr* const ph) {
     }
 }
 
+void* init(char * const buf, const unsigned int bufsize, unsigned int offset) {
+    if (buf+offset > buf+bufsize) {
+        printf("invalid (%x, %x)\n", buf+offset, buf+bufsize);
+        return NULL;
+    }
+    return (buf+offset);
+}
+
+int elf_get_number_of_sections(unsigned char* elf_file, unsigned int len) {
+    bool is_64bit;
+    if (!is_elf(elf_file, len, &is_64bit)) {
+        return -1;
+    }
+    // to do: use 64 bit elf header if is_64bit
+    Elf32_Ehdr *eh;
+    eh = (Elf32_Ehdr*)elf_file;
+    int no_of_sections = eh -> e_shnum;
+    return no_of_sections;
+}
+
+int elf_get_sh_flags(unsigned char *elf_file, unsigned int len, unsigned int n) {
+    bool is_64bit;
+    if (!is_elf(elf_file, len, &is_64bit)) {
+        return -1;
+    }
+    // to do: use 64 bit elf header if is_64bit
+    Elf32_Ehdr *eh;
+    Elf32_Shdr *section_header;
+    eh = (Elf32_Ehdr*)elf_file;
+    if (n > (eh -> e_shnum)) {
+        return -1;
+    }
+    unsigned int offset = n * (eh -> e_shentsize) + eh -> e_shoff;
+    section_header = init(elf_file, len, offset);
+    if (section_header == NULL) {
+        return -1;
+    }
+    int sh_flags = section_header ->  sh_flags;
+    return sh_flags;
+}
+
+int elf_copy_section_to_array(int section_no, uint8_t *array) {
+    // assume  array has not been allocated and will be freed by  callee
+    return 0;
+}
+
+
+// demo/testing purposes
+#ifdef STANDALONE
 // generic, load any binary file
 char *loadfile(const char *fname, unsigned int *s) {
     FILE *f           = fopen(fname, "rb");
@@ -158,20 +207,12 @@ char *loadfile(const char *fname, unsigned int *s) {
     return buf;
 }
 
-void* init(char * const buf, unsigned int offset, const unsigned int bufsize) {
-    if (buf+offset > buf+bufsize) {
-        printf("invalid (%x, %x)\n", buf+offset, buf+bufsize);
-        return NULL;
-    }
-    return (buf+offset);
-}
-
 // print all program and section headers
 void test_00(Elf32_Ehdr * eh, char *buffer, unsigned int bufsize) {
     for (unsigned int i = 0; i < eh -> e_phnum; ++i) {
         printf("-- program header %.2i --\n", i);
         unsigned int offset = i * (eh -> e_phentsize) + eh -> e_phoff;
-        Elf32_Phdr *p = init(buffer, offset, bufsize);
+        Elf32_Phdr *p = init(buffer, bufsize, offset);
         print_phdr(p);
         printf("-----------------------\n");
     }
@@ -179,21 +220,22 @@ void test_00(Elf32_Ehdr * eh, char *buffer, unsigned int bufsize) {
         printf("-- section header %.2i --\n", i);
         Elf32_Shdr *sample;
         unsigned int offset = i * (eh -> e_shentsize) + eh -> e_shoff;
-        sample = init(buffer, offset, bufsize);
+        sample = init(buffer, bufsize,  offset);
         print_shdr(sample);
         printf("-----------------------\n");
     }
 }
 
-void test_01(Elf32_Ehdr *eh, unsigned int i, const unsigned int bufsize) {
-    char *buf = (char*)eh; // beginning of file
-    // get ith section
-    if (i > eh -> e_shnum) {
+void test_01(unsigned char* elf_file, unsigned int len) {
+    // test file has 7 sections
+    int count = elf_get_number_of_sections(elf_file, len);
+    if (count < 0) {
         return;
     }
-    unsigned int offset = i * (eh -> e_shentsize) + eh -> e_shoff;
-    const  Elf32_Shdr *s = init(buf, offset, bufsize);
-    const unsigned char *section = buf + s -> sh_offset;
+    for (unsigned int i = 0; i < count; i++) {
+        int flags = elf_get_sh_flags(elf_file, len, i);
+        printf("flag: %x\n", flags);
+    }
 }
 
 int main(int argc, char ** argv) {
@@ -212,7 +254,8 @@ int main(int argc, char ** argv) {
     eh = (Elf32_Ehdr*)buffer;
     show_elf_header(eh);
     test_00(eh, buffer, bufsize);
-    test_01(eh, 1, bufsize);
+    test_01(buffer, bufsize);
     free(buffer);
     return 0;
 }
+# endif
