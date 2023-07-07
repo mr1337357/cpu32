@@ -208,7 +208,7 @@ int elf_get_sh_flags(unsigned char *elf_file, unsigned int len,
 }
 
 int elf_copy_section_to_array(unsigned char *elf_file, unsigned int len,
-                              int n, uint8_t *array) {
+                              int n, uint8_t **array) {
     // assume  array has not been allocated and will be freed by  callee
     bool is_64bit;
     void *section_header = elf_get_section_header(elf_file, len, n, &is_64bit);
@@ -236,9 +236,9 @@ int elf_copy_section_to_array(unsigned char *elf_file, unsigned int len,
         // section as specified goes beyond buffer (seg fault)
         return -1;
     }
-    array = (uint8_t*)malloc(sizeof(uint8_t) * (size));
-    memcpy(array, source, size);
-    printf("%p\n",array);
+    *array = (uint8_t*)malloc(sizeof(uint8_t) * (size));
+    memcpy(*array, source, size);
+    // printf("%p\n",*array);
     // for (unsigned int i =0; i < size ; i++) {
     //     printf("%x, ", array[i]);
     // }
@@ -328,12 +328,13 @@ int main(int argc, char ** argv) {
     test_00(eh, buffer, bufsize);
     test_01(buffer, bufsize);
     uint8_t *test = NULL;
-    int c = elf_copy_section_to_array(buffer, bufsize, 1, test);
-    printf("%p\n",test);
+    int c = elf_copy_section_to_array(buffer, bufsize, 1, &test);
+    // printf("%p\n",test);
     if (test != NULL) {
         for (unsigned int i=0; i < c; i++) {
-            printf("%x\n", test[i]);
+            printf("%x, ", test[i]);
         }
+        printf("\n");
     }
     free(test);
     free(buffer);
