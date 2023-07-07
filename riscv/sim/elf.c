@@ -17,17 +17,25 @@ bool is_elf(const unsigned char* const buf, unsigned int bufsize, bool *is_64bit
     bool valid = true;
     if (buf[0] != 0x7f) {// EI_MAG0
         valid = false;
-    } else if (buf[1] != 'E') { // EI_MAG1
+    } 
+    if (buf[1] != 'E') { // EI_MAG1
         valid = false;
-    } else if (buf[2] != 'L') { // EI_MAG2
+    } 
+    if (buf[2] != 'L') { // EI_MAG2
         valid= false;
-    } else if (buf[3] != 'F') { // EI_MAG3
+    } 
+    if (buf[3] != 'F') { // EI_MAG3
         valid = false;
-    } else if (buf[EI_CLASS] == ELFCLASSNONE) {
+    } 
+    if (buf[EI_CLASS] == ELFCLASSNONE) {
         valid = false;
-    } else if (buf[EI_CLASS] == ELFCLASS64) {
+    } 
+    if (buf[EI_CLASS] == ELFCLASS64) {
         *is_64bit = true;
-    } else if (buf[EI_VERSION] == EV_NONE) {
+    } else {
+        *is_64bit = false;
+    }
+    if (buf[EI_VERSION] == EV_NONE) {
         valid = false;
     }
     return valid;
@@ -141,14 +149,39 @@ int elf_get_number_of_sections(unsigned char* elf_file, unsigned int len) {
     if (!is_elf(elf_file, len, &is_64bit)) {
         return -1;
     }
-    // to do: use 64 bit elf header if is_64bit
-    Elf32_Ehdr *eh;
-    eh = (Elf32_Ehdr*)elf_file;
-    int no_of_sections = eh -> e_shnum;
+    int no_of_sections;
+    if (is_64bit) {
+        Elf64_Ehdr *eh;
+        eh = (Elf64_Ehdr*)elf_file;
+        no_of_sections = eh -> e_shnum;
+    } else {
+        Elf32_Ehdr *eh;
+        eh = (Elf32_Ehdr*)elf_file;
+        no_of_sections = eh -> e_shnum;
+    }
     return no_of_sections;
 }
 
-int elf_get_sh_flags(unsigned char *elf_file, unsigned int len, unsigned int n) {
+bool elf_get_section_header(unsigned char *elf_file, unsigned int len, 
+                            unsigned int n, void *sh, bool *is_64bit) {
+    if (!is_elf(elf_file, len, is_64bit)) {
+        return false;
+    }
+    // to do: use 64 bit elf header if is_64bit
+    Elf32_Ehdr *eh;
+    eh = (Elf32_Ehdr*)elf_file;
+    if (n > (eh -> e_shnum)) {
+        return false;
+    }
+    unsigned int offset = n * (eh -> e_shentsize) + eh -> e_shoff;
+    sh = init(elf_file, len, offset);
+    if (sh == NULL) {
+        return false;
+    }
+}
+
+int elf_get_sh_flags(unsigned char *elf_file, unsigned int len, 
+                     unsigned int n) {
     bool is_64bit;
     if (!is_elf(elf_file, len, &is_64bit)) {
         return -1;
@@ -169,11 +202,17 @@ int elf_get_sh_flags(unsigned char *elf_file, unsigned int len, unsigned int n) 
     return sh_flags;
 }
 
-int elf_copy_section_to_array(int section_no, uint8_t *array) {
+int elf_copy_section_to_array(unsigned char *elf_file, unsigned int len,
+                              int n, uint8_t *array) {
     // assume  array has not been allocated and will be freed by  callee
-    return 0;
+    bool is_64bit;
+    void *section_header;
+    bool is_ok = elf_get_section_header(
+        elf_file, len, n, section_header, &is_64bit);
+    if (!is_ok) {
+        return -1;
+    }
 }
-
 
 // demo/testing purposes
 #ifdef STANDALONE
@@ -229,7 +268,8 @@ void test_00(Elf32_Ehdr * eh, char *buffer, unsigned int bufsize) {
 void test_01(unsigned char* elf_file, unsigned int len) {
     // test file has 7 sections
     int count = elf_get_number_of_sections(elf_file, len);
-    if (count < 0) {
+    if (count <= 0) {
+        printf("!\n");
         return;
     }
     for (unsigned int i = 0; i < count; i++) {
