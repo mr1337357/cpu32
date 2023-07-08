@@ -171,16 +171,29 @@ void *elf_get_section_header(unsigned char *elf_file, unsigned int len,
         return NULL;
     }
     // to do: use 64 bit elf header if is_64bit
-    Elf32_Ehdr *eh;
-    eh = (Elf32_Ehdr*)elf_file;
-    if (n > (eh -> e_shnum)) {
+    int shnum;
+    int shentsize;
+    int shoff;
+    is_64bit = false;
+    if (is_64bit) {
+        Elf64_Ehdr *eh;
+        eh = (Elf64_Ehdr*)elf_file;
+        shnum = eh -> e_shnum;
+        shentsize = eh -> e_shentsize;
+        shoff = eh -> e_shoff;
+    } else {
+        Elf32_Ehdr *eh;
+        eh = (Elf32_Ehdr*)elf_file;
+        shnum = eh -> e_shnum;
+        shentsize = eh -> e_shentsize;
+        shoff = eh -> e_shoff;
+    }
+    if (n > shnum) {
         return NULL;
     }
-    unsigned int offset = n * (eh -> e_shentsize) + eh -> e_shoff;
+    unsigned int offset = n * shentsize + shoff;
     void *sh = init(elf_file, len, offset);
-    if (sh == NULL) {
-        return NULL;
-    }
+    // return value may also be null
     return sh;
 }
 
@@ -191,25 +204,23 @@ int elf_get_sh_flags(unsigned char *elf_file, unsigned int len,
     if (!is_elf(elf_file, len, &is_64bit)) {
         return -1;
     }
-    // to do: use 64 bit elf header if is_64bit
-    Elf32_Ehdr *eh;
-    Elf32_Shdr *section_header;
-    eh = (Elf32_Ehdr*)elf_file;
-    if (n > (eh -> e_shnum)) {
-        return -1;
-    }
-    unsigned int offset = n * (eh -> e_shentsize) + eh -> e_shoff;
-    section_header = init(elf_file, len, offset);
+    void *section_header = elf_get_section_header(elf_file, len, n, &is_64bit);
     if (section_header == NULL) {
         return -1;
     }
-    int sh_flags = section_header ->  sh_flags;
+    int sh_flags;
+    if (is_64bit) {
+        Elf64_Shdr *sh = section_header;
+        sh_flags = sh ->  sh_flags;
+    } else {
+        Elf32_Shdr *sh = section_header;
+        sh_flags = sh ->  sh_flags;
+    }
     return sh_flags;
 }
 
 int elf_copy_section_to_array(unsigned char *elf_file, unsigned int len,
                               int n, uint8_t **array) {
-    // assume  array has not been allocated and will be freed by  callee
     bool is_64bit;
     void *section_header = elf_get_section_header(elf_file, len, n, &is_64bit);
     if (section_header == NULL) {
@@ -225,8 +236,6 @@ int elf_copy_section_to_array(unsigned char *elf_file, unsigned int len,
         type   = sh -> sh_type;
         offset = sh -> sh_offset;
         size   = sh -> sh_size;
-        print_shdr(sh);
-        // printf("%x, %x, %x\n", offset, sh -> sh_offset, len);
     }
     if (size <= 0) {
         return size; // hits for SHT_NULL or SHT_NOBITS
@@ -238,11 +247,6 @@ int elf_copy_section_to_array(unsigned char *elf_file, unsigned int len,
     }
     *array = (uint8_t*)malloc(sizeof(uint8_t) * (size));
     memcpy(*array, source, size);
-    // printf("%p\n",*array);
-    // for (unsigned int i =0; i < size ; i++) {
-    //     printf("%x, ", array[i]);
-    // }
-    // printf("\n");
     return size;
 }
 
