@@ -166,27 +166,27 @@ int elf_get_number_of_sections(unsigned char* elf_file, unsigned int len) {
 }
 
 void *elf_get_section_header(unsigned char *elf_file, unsigned int len, 
-                            unsigned int n, bool *is_64bit) {
-    if (!is_elf(elf_file, len, is_64bit)) {
+                            unsigned int n) {
+    bool is_64bit;
+    if (!is_elf(elf_file, len, &is_64bit)) {
         return NULL;
     }
     // to do: use 64 bit elf header if is_64bit
     int shnum;
     int shentsize;
     int shoff;
-    is_64bit = false;
     if (is_64bit) {
         Elf64_Ehdr *eh;
         eh = (Elf64_Ehdr*)elf_file;
         shnum = eh -> e_shnum;
-        shentsize = eh -> e_shentsize;
         shoff = eh -> e_shoff;
+        shentsize = eh -> e_shentsize;
     } else {
         Elf32_Ehdr *eh;
         eh = (Elf32_Ehdr*)elf_file;
         shnum = eh -> e_shnum;
-        shentsize = eh -> e_shentsize;
         shoff = eh -> e_shoff;
+        shentsize = eh -> e_shentsize;
     }
     if (n > shnum) {
         return NULL;
@@ -204,7 +204,7 @@ int elf_get_sh_flags(unsigned char *elf_file, unsigned int len,
     if (!is_elf(elf_file, len, &is_64bit)) {
         return -1;
     }
-    void *section_header = elf_get_section_header(elf_file, len, n, &is_64bit);
+    void *section_header = elf_get_section_header(elf_file, len, n);
     if (section_header == NULL) {
         return -1;
     }
@@ -222,7 +222,10 @@ int elf_get_sh_flags(unsigned char *elf_file, unsigned int len,
 int elf_copy_section_to_array(unsigned char *elf_file, unsigned int len,
                               int n, uint8_t **array) {
     bool is_64bit;
-    void *section_header = elf_get_section_header(elf_file, len, n, &is_64bit);
+    if (!is_elf(elf_file, len, &is_64bit)) {
+        return -1;
+    }
+    void *section_header = elf_get_section_header(elf_file, len, n);
     if (section_header == NULL) {
         return -1;
     }
