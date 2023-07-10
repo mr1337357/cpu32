@@ -1,5 +1,7 @@
 #include <stdint.h>
+
 #include "cpu.h"
+#include "mem.h"
 
 int64_t pc;
 
@@ -51,6 +53,7 @@ instruction rv32i[] =
     { 0x0000707f, 0x0000000F, }, //fence
     { 0xFFFFFFFF, 0x00000073, }, //ecall
     { 0xFFFFFFFF, 0x00100073, }, //ebreak
+};
 
 int decode()
 {

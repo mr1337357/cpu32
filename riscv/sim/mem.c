@@ -13,8 +13,9 @@ struct mem_segment
 
 int num_segments = 0;
 struct mem_segment *memory = 0;
+uint64_t pagetable = 0;
 
-int mem_make_segment(uint64_t start,uint64_t size)
+int mem_make_segment(uint64_t start,uint64_t size,uint8_t permissions)
 {
     struct mem_segment *newsegment;
     //TODO: check for overlaps and reject
@@ -22,7 +23,21 @@ int mem_make_segment(uint64_t start,uint64_t size)
     newsegment = &memory[num_segments-1];
     newsegment->start = start;
     newsegment->end = start+size - 1;
+    newsegment->permissions = permissions;
     newsegment->memory = malloc(size);
+    return 0;
+}
+
+uint8_t *mem_get_segment_ptr(uint64_t start)
+{
+    int i;
+    for(i=0;i<num_segments;i++)
+    {
+        if(memory[i].start == address)
+        {
+            return memory[i].memory;
+        }
+    }
     return 0;
 }
 
@@ -73,3 +88,10 @@ int mem_phys_write_8(uint64_t address,uint8_t *data, uint8_t access)
     memory[i].memory[offset] = *data;
     return MEM_OK;
 }
+
+int mem_read_32(uint64_t address, uint32_t *data, uint8_t access)
+{
+    if(pagetable == 1)
+    {
+        //todo
+    }
