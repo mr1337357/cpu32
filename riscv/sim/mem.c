@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdint.h>
+#include <stdlib.h>
 
 #include "mem.h"
 
@@ -18,7 +19,7 @@ int mem_make_segment(uint64_t start,uint64_t size)
 {
     struct mem_segment *newsegment;
     //TODO: check for overlaps and reject
-    memory = realloc(memory,++num_segments * sizeof(mem_segment));
+    memory = realloc(memory,++num_segments * sizeof(struct mem_segment));
     newsegment = &memory[num_segments-1];
     newsegment->start = start;
     newsegment->end = start+size - 1;

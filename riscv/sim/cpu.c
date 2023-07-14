@@ -51,6 +51,7 @@ instruction rv32i[] =
     { 0x0000707f, 0x0000000F, }, //fence
     { 0xFFFFFFFF, 0x00000073, }, //ecall
     { 0xFFFFFFFF, 0x00100073, }, //ebreak
+};
 
 int decode()
 {
@@ -62,5 +63,5 @@ int execute()
 
 int fetch()
 {
-    mem_read_32(pc,&ir,MEM_EX);
+    //mem_read_32(pc,&ir,MEM_EX);
 }
