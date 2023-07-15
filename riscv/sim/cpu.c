@@ -63,5 +63,6 @@ int execute()
 
 int fetch()
 {
-    //mem_read_32(pc,&ir,MEM_EX);
+    int status;
+    status = mem_read_32(pc,&ir,MEM_EX);
 }

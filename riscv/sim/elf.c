@@ -17,6 +17,29 @@
 #define DEBUG_PRINT(x,...) fprintf(stderr,"%s(%d): " x,__FILE__,__LINE__,__VA_ARGS__)
 #endif
 
+struct elf_file
+{
+    FILE *f;
+    bool is_64;
+    union
+    {
+        Elf32_Ehdr e32_hdr;
+        Elf64_Ehdr e64_hdr;
+        uint8_t buf[0];
+    };
+    union
+    {
+        Elf32_Phdr *e32_phdr;
+        Elf64_Phdr *e64_phdr;
+    };
+    union
+    {
+        Elf32_Shdr *e32_shdr;
+        Elf64_Shdr *e64_shdr;
+    };
+};
+
+
 // #pragma pack(1)
 
 bool is_elf(const unsigned char* const buf, unsigned int bufsize, bool *is_64bit) {
