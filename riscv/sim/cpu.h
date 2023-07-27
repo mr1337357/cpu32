@@ -5,6 +5,13 @@ typedef struct
     void *extradata;
 } instruction;
 
+typedef struct
+{
+    uint64_t satp;
+} csr_struct;
+
+typedef struct cpu cpu;
+
 #define RV32I (1<< 0)
 #define RV64I (1<< 1)
 #define ZIFEN (1<< 2)
@@ -15,3 +22,5 @@ typedef struct
 #define RV64A (1<< 7)
 #define RV32C (1<< 8)
 #define RV64C (1<< 9)
+
+int cpu_step(cpu *c);

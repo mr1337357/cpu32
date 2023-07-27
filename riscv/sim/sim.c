@@ -2,6 +2,7 @@
 
 #include "elf.h"
 #include "mem.h"
+#include "cpu.h"
 
 #if defined(DEBUG)
 #define DEBUG_PRINT(x,...) fprintf(stderr,"%s(%d): " x,__FILE__,__LINE__,__VA_ARGS__)
@@ -39,13 +40,15 @@ int load_elf(elf_file *ef)
             elf_copy_section_to_array(ef,i,mem_ptr);
         }
     }
+    
     mem_dump();
+    
     return 0;
 }
 
 int main(int argc,char **argv)
 {
-    
+    cpu *c;
     elf_file *ef;
     ef = elf_open(argv[1]);
     if(ef == NULL)
@@ -54,5 +57,10 @@ int main(int argc,char **argv)
     }
     mem_init();
     load_elf(ef);
+    elf_close(ef);
+    while(1)
+    {
+        cpu_step(c);
+    }
     return 0;
 }

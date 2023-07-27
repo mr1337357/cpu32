@@ -13,8 +13,14 @@ struct mem_segment
     uint8_t *memory;
 };
 
-int num_segments = 0;
-struct mem_segment *memory = 0;
+//LOCALS
+static int num_segments = 0;
+static struct mem_segment *memory = 0;
+
+//CSRs
+#define SATP_MODE (satp>>60)
+#define SATP_ASID ((satp>>44)&0xFFFF)
+#define SATP_PPN  ((satp>>0)&0xFFFFFFFFFFF)
 
 int mem_init()
 {
@@ -49,7 +55,7 @@ uint8_t *mem_get_segment_ptr(uint64_t address)
     return 0;
 }
 
-int mem_phys_read_8(uint64_t address,uint8_t *data,uint8_t access)
+void *mem_get_phys_ptr(uint64_t address)
 {
     uint64_t offset;
     int i;
@@ -62,43 +68,58 @@ int mem_phys_read_8(uint64_t address,uint8_t *data,uint8_t access)
     }
     if(i==num_segments)
     {
-        return MEM_INVALID;
-    }
-    if(!(access & memory[i].permissions))
-    {
-        return access == MEM_RD? MEM_NOREAD : MEM_NOEXEC;
+        return 0;
     }
     offset = address - memory[i].start;
-    *data = memory[i].memory[offset];
-    return MEM_OK;
+    return &memory[i].memory[offset];
 }
 
-int mem_phys_write_8(uint64_t address,uint8_t *data, uint8_t access)
+int mem_read_bytes(uint64_t address, void *data, uint8_t len, uint8_t access)
 {
-    uint64_t offset;
+    uint8_t *dptr = data;
+    uint8_t *ptr = 0;
     int i;
-    for(i=0;i<num_segments;i++)
+    if(SATP_MODE == 0x08) //39 bit virtual memory
     {
-        if(memory[i].start <= address && memory[i].end >= address)
+        
+    }
+    else
+    {
+        ptr = mem_get_phys_ptr(address);
+    }
+    if(ptr != NULL)
+    {
+        for(i=0;i<len;i++)
         {
-            break;
+            dptr[i] = ptr[i];
         }
+        return MEM_OK;
     }
-    if(i==num_segments)
-    {
-        return MEM_INVALID;
-    }
-    if(!(access & memory[i].permissions))
-    {
-        return access == MEM_NOWRITE;
-    }
-    offset = address - memory[i].start;
-    memory[i].memory[offset] = *data;
-    return MEM_OK;
+    return MEM_INVALID;
 }
-int mem_virt_read_32(uint64_t address,uint32_t *data, uint8_t access)
+
+int mem_write_bytes(uint64_t address, void *data, uint8_t len, uint8_t access)
 {
-    return MEM_OK;
+    uint8_t *dptr = data;
+    uint8_t *ptr = 0;
+    int i;
+    if(SATP_MODE == 0x08) //39 bit virtual memory
+    {
+        
+    }
+    else
+    {
+        ptr = mem_get_phys_ptr(address);
+    }
+    if(ptr != NULL)
+    {
+        for(i=0;i<len;i++)
+        {
+            ptr[i] = dptr[i];
+        }
+        return MEM_OK;
+    }
+    return MEM_INVALID;
 }
 
 void mem_dump()

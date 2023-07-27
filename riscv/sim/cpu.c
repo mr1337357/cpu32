@@ -1,13 +1,21 @@
 #include <stdint.h>
+
 #include "cpu.h"
+#include "mem.h"
 
-int64_t pc;
 
-uint64_t ir;
 
-uint64_t isa;
+struct cpu
+{
+    int64_t pc;
+    uint64_t ir;
+    uint64_t isa;
+    int64_t registers[32];
+    csr_struct csrs;
+};
 
-int64_t registers[32];
+//CSRs
+uint64_t satp = 0;
 
 instruction rv32i[] =
 {
@@ -61,8 +69,14 @@ int execute()
 {
 }
 
-int fetch()
+int fetch(cpu *c)
 {
     int status;
-    status = mem_read_32(pc,&ir,MEM_EX);
+    status = mem_read_bytes(c->pc, &c->ir, sizeof(c->ir), MEM_EX);
+
+}
+
+int cpu_step(cpu *c)
+{
+    fetch(c);
 }
