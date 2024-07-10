@@ -1,16 +1,18 @@
-typedef struct
-{
-    uint32_t mask;
-    uint32_t opcode;
-    void *extradata;
-} instruction;
-
+#ifndef __CPU_H__
 typedef struct
 {
     uint64_t satp;
 } csr_struct;
 
 typedef struct cpu cpu;
+
+typedef struct
+{
+    uint32_t mask;
+    uint32_t opcode;
+    itype
+    int (*fxn)(cpu *);
+} instruction;
 
 #define RV32I (1<< 0)
 #define RV64I (1<< 1)
@@ -24,3 +26,6 @@ typedef struct cpu cpu;
 #define RV64C (1<< 9)
 
 int cpu_step(cpu *c);
+
+#define __CPU_H__
+#endif //__CPU_H__

@@ -18,9 +18,9 @@ static int num_segments = 0;
 static struct mem_segment *memory = 0;
 
 //CSRs
-#define SATP_MODE (satp>>60)
-#define SATP_ASID ((satp>>44)&0xFFFF)
-#define SATP_PPN  ((satp>>0)&0xFFFFFFFFFFF)
+#define SATP_MODE(satp) (satp>>60)
+#define SATP_ASID(satp) ((satp>>44)&0xFFFF)
+#define SATP_PPN(satp)  ((satp>>0)&0xFFFFFFFFFFF)
 
 int mem_init()
 {
@@ -74,14 +74,14 @@ void *mem_get_phys_ptr(uint64_t address)
     return &memory[i].memory[offset];
 }
 
-int mem_read_bytes(uint64_t address, void *data, uint8_t len, uint8_t access)
+int mem_read_bytes(uint64_t address, void *data, uint8_t len, uint8_t access, csr_struct *csr)
 {
     uint8_t *dptr = data;
     uint8_t *ptr = 0;
     int i;
-    if(SATP_MODE == 0x08) //39 bit virtual memory
+    if(SATP_MODE(csr->satp) == 0x08) //39 bit virtual memory
     {
-        
+        return MEM_INVALID; //TODO: paging
     }
     else
     {
@@ -98,14 +98,14 @@ int mem_read_bytes(uint64_t address, void *data, uint8_t len, uint8_t access)
     return MEM_INVALID;
 }
 
-int mem_write_bytes(uint64_t address, void *data, uint8_t len, uint8_t access)
+int mem_write_bytes(uint64_t address, void *data, uint8_t len, uint8_t access, csr_struct *csr)
 {
     uint8_t *dptr = data;
     uint8_t *ptr = 0;
     int i;
-    if(SATP_MODE == 0x08) //39 bit virtual memory
+    if(SATP_MODE(csr->satp) == 0x08) //39 bit virtual memory
     {
-        
+        return MEM_INVALID; //TODO: paging
     }
     else
     {

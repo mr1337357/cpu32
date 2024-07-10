@@ -3,6 +3,8 @@
 #include "cpu.h"
 #include "mem.h"
 
+//immediates
+#define UIMM(opcode) (opcode & 0xFFFFF000)
 
 
 struct cpu
@@ -14,8 +16,9 @@ struct cpu
     csr_struct csrs;
 };
 
-//CSRs
-uint64_t satp = 0;
+int lui(cpu *c)
+{
+    
 
 instruction rv32i[] =
 {
@@ -61,22 +64,43 @@ instruction rv32i[] =
     { 0xFFFFFFFF, 0x00100073, }, //ebreak
 };
 
-int decode()
+#define NUM_RV32I (sizeof(rv32i)/sizeof(rv32i[0]))
+
+instruction *decode(cpu *c)
 {
+    uint64_t ir = c->ir;
+    instruction *in = 0;
+    int i;
+    if(c->isa & RV32I)
+    {
+        for(i=0;i<NUM_RV32I;i++)
+        {
+            if((ir&rv32i[i].mask) == rv32i[i].opcode)
+            {
+                in = &rv32i[i];
+                break;
+            }
+        }
+    }
+    return in;
 }
 
-int execute()
+int execute(cpu *c,instruction *in)
 {
+    in->fxn(c);
 }
 
 int fetch(cpu *c)
 {
     int status;
-    status = mem_read_bytes(c->pc, &c->ir, sizeof(c->ir), MEM_EX);
+    status = mem_read_bytes(c->pc, &c->ir, sizeof(c->ir), MEM_EX,&c->csrs);
 
 }
 
 int cpu_step(cpu *c)
 {
+    instruction *in;
     fetch(c);
+    in = decode(c);
+    execute(c,in);
 }
